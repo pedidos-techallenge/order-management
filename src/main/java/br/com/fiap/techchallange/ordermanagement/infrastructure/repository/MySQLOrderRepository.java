@@ -1,10 +1,11 @@
-package br.com.fiap.techchallange.ordermanagement.infrastructure.bd;
+package br.com.fiap.techchallange.ordermanagement.infrastructure.repository;
 
 import br.com.fiap.techchallange.ordermanagement.adapters.gateways.repository.IOrderRepository;
 import br.com.fiap.techchallange.ordermanagement.core.entity.Order;
 import br.com.fiap.techchallange.ordermanagement.core.entity.vo.Item;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -28,10 +29,21 @@ public class MySQLOrderRepository implements IOrderRepository {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
+    @Value("${spring.custom.db-type}")
+    private String dbType;  // Injeta o tipo de banco de dados
+
+    public String getTableName(String tableName) {
+        if ("mysql".equalsIgnoreCase(dbType)) {
+            return "`" + tableName + "`"; // MySQL
+        } else {
+            return "\"" + tableName + "\""; // H2
+        }
+    }
+
     @Transactional
     @Override
-    public void create(Order order) {
-        String sql = "INSERT INTO dbtechchallange.order (id, number_order, status) values (:id, :number_order, :status)";
+    public Order create(Order order) {
+        String sql = "INSERT INTO dbtechchallange." + getTableName("order") + " (id, number_order, status) values (:id, :number_order, :status)";
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", order.getId());
@@ -40,11 +52,13 @@ public class MySQLOrderRepository implements IOrderRepository {
         namedParameterJdbcTemplate.update(sql, params);
 
         addItem(order.getItems());
+
+        return order;
     }
 
     @Override
     public void update(Order order) {
-        StringBuilder sql = new StringBuilder("UPDATE dbtechchallange.order SET ");
+        StringBuilder sql = new StringBuilder("UPDATE dbtechchallange." + getTableName("order") + " SET ");
         Map<String, Object> params = new HashMap<>();
 
         sql.append("number_order = :numberOrder, ");
@@ -66,7 +80,7 @@ public class MySQLOrderRepository implements IOrderRepository {
     @Override
     public void addItem(List<Item> items){
 
-        String sql = "INSERT INTO dbtechchallange.item (order_id, sku, quantity, unit_value) values (:order_id, :sku, :quantity, :unitValue)";
+        String sql = "INSERT INTO dbtechchallange." + getTableName("item") + "  (order_id, sku, quantity, unit_value) values (:order_id, :sku, :quantity, :unitValue)";
 
         SqlParameterSource[] batch = new SqlParameterSource[items.size()];
         for (int i = 0; i < items.size(); i++) {
@@ -77,11 +91,9 @@ public class MySQLOrderRepository implements IOrderRepository {
     }
 
 
-
-
     @Override
     public Order getByOrderNumber(int order_number) {
-        String sql = "SELECT * FROM dbtechchallange.order WHERE number_order = :order_number";
+        String sql = "SELECT * FROM dbtechchallange." + getTableName("order") + " WHERE number_order = :order_number";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("order_number", order_number);
 
@@ -99,7 +111,7 @@ public class MySQLOrderRepository implements IOrderRepository {
 
     @Override
     public List<Order> getOrders() {
-        String sql = "SELECT * FROM dbtechchallange.order\n" +
+        String sql = "SELECT * FROM dbtechchallange." + getTableName("order") + " \n" +
                      "WHERE status IN ('Recebido', 'Em Preparacao', 'Pronto')\n" +
                      "ORDER BY \n" +
                      "  CASE \n" +
@@ -116,7 +128,17 @@ public class MySQLOrderRepository implements IOrderRepository {
 
     @Override
     public int getLastNumber() {
-        String sql = "SELECT MAX(number_order) FROM dbtechchallange.order";
+        String sql = "SELECT MAX(number_order) FROM dbtechchallange." + getTableName("order");
+        try {
+            return namedParameterJdbcTemplate.queryForObject(sql, new MapSqlParameterSource(), Integer.class);
+        } catch (NullPointerException e) {
+            return 0;
+        }
+    }
+
+    @Override
+    public int count() {
+        String sql = "SELECT count(*) FROM dbtechchallange." + getTableName("order");
         try {
             return namedParameterJdbcTemplate.queryForObject(sql, new MapSqlParameterSource(), Integer.class);
         } catch (NullPointerException e) {
@@ -127,7 +149,7 @@ public class MySQLOrderRepository implements IOrderRepository {
     @Transactional
     @Override
     public Order get(String ordemId) {
-        String sql = "SELECT * FROM dbtechchallange.order WHERE id = :ordemId";
+        String sql = "SELECT * FROM dbtechchallange." + getTableName("order") + " WHERE id = :ordemId";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("ordemId", ordemId);
 
@@ -147,7 +169,7 @@ public class MySQLOrderRepository implements IOrderRepository {
 
 
     private List<Item> getItems(String ordemId){
-        String sql = "SELECT * FROM dbtechchallange.item WHERE order_id = :ordemId";
+        String sql = "SELECT * FROM dbtechchallange." + getTableName("order") + " WHERE order_id = :ordemId";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("ordemId", ordemId);
         List<Item> items = new ArrayList<>();

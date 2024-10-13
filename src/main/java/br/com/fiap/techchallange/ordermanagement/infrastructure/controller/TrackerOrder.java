@@ -1,4 +1,4 @@
-package br.com.fiap.techchallange.ordermanagement.infrastructure.api;
+package br.com.fiap.techchallange.ordermanagement.infrastructure.controller;
 
 import br.com.fiap.techchallange.ordermanagement.adapters.controllers.tracking.IOrderListingController;
 import br.com.fiap.techchallange.ordermanagement.adapters.presenters.viewmodel.ErrorViewModel;
@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/tracker/orders")
-@Tag(name = "7. Tracker Order", description = "Endpoints para o rastreamento dos pedidos.")
+@RequestMapping("/v1/order")
+@Tag(name = "4. Tracker Order", description = "Endpoints para o rastreamento dos pedidos.")
 public class TrackerOrder {
 
     private final IOrderListingPresenter orderListingPresenter;
@@ -31,7 +31,7 @@ public class TrackerOrder {
     }
 
     @Operation(summary = "Busca os pedidos que estão no processo de atendimento")
-    @GetMapping("/list")
+    @GetMapping("/tracker")
     public ResponseEntity<List<OrderViewModel>> getOrders(){
         List<OrderViewModel> response = orderListingPresenter.invoke(orderListingController.invoke());
         return new ResponseEntity<>(response, HttpStatus.OK);

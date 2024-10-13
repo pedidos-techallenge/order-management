@@ -13,7 +13,7 @@ import java.util.List;
 
 public class FinishOrderSelectionUseCase implements IFinishOrderSelectionUseCase {
 
-    private final IOrderRepository orderRepository;;
+    private final IOrderRepository orderRepository;
 
     public FinishOrderSelectionUseCase(IOrderRepository orderRepository){
         this.orderRepository = orderRepository;

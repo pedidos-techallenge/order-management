@@ -1,4 +1,4 @@
-package br.com.fiap.techchallange.ordermanagement.infrastructure.api;
+package br.com.fiap.techchallange.ordermanagement.infrastructure.controller;
 
 import br.com.fiap.techchallange.ordermanagement.adapters.controllers.checkout.IFinishOrderSelectionController;
 import br.com.fiap.techchallange.ordermanagement.adapters.presenters.viewmodel.ErrorViewModel;
@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/checkout")
-@Tag(name = "2. Checkout", description = "Endpoints para a criação de pedido do cliente.")
+@RequestMapping("/v1/order")
+@Tag(name = "1. Checkout", description = "Endpoints para a criação de pedido do cliente.")
 public class Checkout {
 
 
@@ -38,7 +38,7 @@ public class Checkout {
     }
 
     @Operation(summary = "Envia o pedido para cadastro base de dados.")
-    @PostMapping("/orders")
+    @PostMapping("/checkout")
     public ResponseEntity<?> registerOrder(@RequestBody OrderRequestDTO orderRequest) throws EmptyResultDataAccessException, DuplicateKeyException {
         try {
             List<InputDataItemDTO> itemsInput = new ArrayList<>();
@@ -47,7 +47,7 @@ public class Checkout {
             }
 
             OrderViewModel response = this.finishOrderSelectionPresenter.invoke(this.finishOfOrderSelectionController.invoke(new InputDataOrderDTO(orderRequest.getId(), itemsInput)));
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<>(new ErrorViewModel(2,"Ocorreu um problema ao registrar a order de serviço"), HttpStatus.BAD_REQUEST);
         } catch (DuplicateKeyException e) {

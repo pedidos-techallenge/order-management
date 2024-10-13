@@ -1,4 +1,4 @@
-package br.com.fiap.techchallange.ordermanagement.infrastructure.api;
+package br.com.fiap.techchallange.ordermanagement.infrastructure.controller;
 
 import br.com.fiap.techchallange.ordermanagement.adapters.controllers.orderpreparation.IDeliveryOfProductsController;
 import br.com.fiap.techchallange.ordermanagement.adapters.presenters.viewmodel.ErrorViewModel;
@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/v1/finishorder")
-@Tag(name = "6. Finish Order", description = "Endpoints para encerrar o atendimento do pedido")
+@RequestMapping("/v1/order")
+@Tag(name = "3. Finish Order", description = "Endpoints para encerrar o atendimento do pedido")
 public class FinishOrder{
 
     private final IDeliveryOfProductsController deliveryOfProductsController;
@@ -24,12 +24,12 @@ public class FinishOrder{
     }
 
     @Operation(summary = "Cria o pedido para atendimento do cliente, que irá acompanha-lo até a entrega do produto")
-    @PostMapping("/{number_order}")
+    @PutMapping("/finished/{number_order}")
     public ResponseEntity<Map<String, String>> initializeServiceResponse(@PathVariable int number_order){
         deliveryOfProductsController.invoke(number_order);
         Map<String, String> response = new HashMap<>();
         response.put("status", "Pedido " + number_order + " Finalizado com sucesso!");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
     @ExceptionHandler(ChangeNotAllowedOrderException.class)

@@ -1,4 +1,4 @@
-package br.com.fiap.techchallange.ordermanagement.infrastructure.api;
+package br.com.fiap.techchallange.ordermanagement.infrastructure.controller;
 
 import br.com.fiap.techchallange.ordermanagement.adapters.controllers.orderpreparation.IFinishingOfFoodPreparationController;
 import br.com.fiap.techchallange.ordermanagement.adapters.controllers.orderpreparation.IFoodPreparationController;
@@ -14,8 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/v1/orderpreparation")
-@Tag(name = "5. Order Preparation", description = "Endpoints para preparação do pedido.")
+@RequestMapping("/v1/order/operation")
+@Tag(name = "2. Order Preparation", description = "Endpoints para preparação do pedido.")
 public class PreparationOrder {
 
     private final IFoodPreparationController prepareFood;
@@ -28,7 +28,7 @@ public class PreparationOrder {
     }
 
     @Operation(summary = "Coloca o pedido no status de preparação da comida")
-    @PutMapping("/preparefood/{number_order}")
+    @PutMapping("/preparation/{number_order}")
     public ResponseEntity<Map<String, String>> prepareFoodResponse(@PathVariable int number_order){
         prepareFood.invoke(number_order);
         Map<String, String> response = new HashMap<>();
@@ -36,8 +36,8 @@ public class PreparationOrder {
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
-    @Operation(summary = "Coloca o pedido no status de preparação da comida finalizada")
-    @PutMapping("/finishfoodpreparation/{number_order}")
+    @Operation(summary = "Coloca o pedido no status de preparação da comida pronta")
+    @PutMapping("/done/{number_order}")
     public ResponseEntity<Map<String, String>> finishpreParationResponse(@PathVariable int number_order){
         finishPrepareFood.invoke(number_order);
         Map<String, String> response = new HashMap<>();
