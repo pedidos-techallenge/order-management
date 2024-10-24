@@ -22,4 +22,11 @@ public class OrderListingPresenter implements IOrderListingPresenter {
 
         return ordersView;
     }
+
+    @Override
+    public OrderViewModel invoke(OutputDataOrderDTO outputDataOrderDTO) {
+        return new OrderViewModel(outputDataOrderDTO.id(),
+                outputDataOrderDTO.number_order(),
+                outputDataOrderDTO.status());
+    }
 }

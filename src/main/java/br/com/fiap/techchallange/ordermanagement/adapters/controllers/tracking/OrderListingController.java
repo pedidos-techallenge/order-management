@@ -17,4 +17,11 @@ public class OrderListingController implements IOrderListingController {
     public List<OutputDataOrderDTO> invoke() {
         return orderListingUseCase.invoke();
     }
+
+    @Override
+    public OutputDataOrderDTO invoke(String idOrder) {
+        return orderListingUseCase.invoke(idOrder);
+    }
+
+
 }

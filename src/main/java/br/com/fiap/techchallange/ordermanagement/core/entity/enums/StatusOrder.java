@@ -1,7 +1,7 @@
 package br.com.fiap.techchallange.ordermanagement.core.entity.enums;
 
 public enum StatusOrder {
-    OPEN("Aberto"), RECEIVED("Recebido"), INPREPARATION("Em Preparacao"), FOODDONE("Pronto"), FINISHED("Finalizado");
+    OPEN("Aberto"), RECEIVED("Recebido"), INPREPARATION("EmPreparacao"), FOODDONE("Pronto"), FINISHED("Finalizado"), CANCELED("Cancelado");
 
     private final String value;
 
@@ -22,14 +22,3 @@ public enum StatusOrder {
         throw new IllegalArgumentException("Valor inválido: " + value);
     }
 }
-
-
-/*
-*
-*
-                OPEN("Aberto"),
-                RECEIVED("Recebido"),
-                INPREPARATION("Em Preparacao"),
-                FOODDONE("Pronto"),
-                FINISHED("Finalizado");
-* */

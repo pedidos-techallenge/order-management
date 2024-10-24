@@ -25,7 +25,7 @@ public class FinishOrderSelectionUseCase implements IFinishOrderSelectionUseCase
         List<Item> items = new ArrayList<>();
 
         for(InputDataItemDTO item: inputDataOrderDTO.items()){
-            items.add(new Item(inputDataOrderDTO.id(), item.sku(), item.quantity(), item.amount()));
+            items.add(new Item(item.sku(), item.quantity(), item.amount()));
         }
 
         Order order = new Order(inputDataOrderDTO.id(), items);

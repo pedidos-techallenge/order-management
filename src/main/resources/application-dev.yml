@@ -1,4 +1,11 @@
 spring:
+  database:
+    sql:
+      enabled: false
+  data:
+    mongodb:
+      uri: mongodb://admin:admin@localhost:27017/dbtechchallange?authSource=admin
+      database: dbtechchallange
   datasource:
     url: jdbc:mysql://localhost:3306/dbtechchallange?allowPublicKeyRetrieval=true&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,7 +19,13 @@ spring:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
 
-  h2:
-    console:
-      enabled: false
-      path: /h2-console
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: test
+        secret-key: test
+      sqs:
+        endpoint: http://localhost:4566
+        region: us-east-1

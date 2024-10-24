@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+*.json
+aws-local/localstack/cache/server.test.pem
+aws-local/localstack/cache/server.test.pem.crt
+aws-local/localstack/cache/server.test.pem.key
+aws-local/localstack/cache/service-catalog-3_8_2_dev40-1_35_39.pickle

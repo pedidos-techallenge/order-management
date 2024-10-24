@@ -1,4 +1,10 @@
 spring:
+  database:
+    sql:
+      enabled: false
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/dbtechchallange
   datasource:
     url: jdbc:mysql://localhost:3306/dbtechchallange?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver

@@ -1,6 +1,8 @@
-package br.com.fiap.techchallange.ordermanagement.infrastructure.config.gateways;
+package br.com.fiap.techchallange.ordermanagement.infrastructure.config.gateways.repository;
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -8,7 +10,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 
 @Configuration
-public class DataSourceConfig {
+@ConditionalOnProperty(name = "spring.database.sql.enabled", havingValue = "true")
+public class RepositoryMySQLConfig {
 
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;

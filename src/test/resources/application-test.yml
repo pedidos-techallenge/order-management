@@ -1,4 +1,12 @@
 spring:
+  database:
+    sql:
+      enabled: false
+  data:
+    mongodb:
+      uri: mongodb://admin:admin@localhost:27017/dbtechchallange?authSource=admin
+      database: test
+      port: 0
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
@@ -7,9 +15,11 @@ spring:
     platform: h2
   custom:
     db-type: h2
+
   h2:
     console:
       enabled: true
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,3 +27,14 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: test
+        secret-key: test
+      sqs:
+        endpoint: http://localhost:4566
+        region: us-east-1

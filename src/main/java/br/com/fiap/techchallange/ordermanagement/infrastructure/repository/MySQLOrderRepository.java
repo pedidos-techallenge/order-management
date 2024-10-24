@@ -1,14 +1,14 @@
 package br.com.fiap.techchallange.ordermanagement.infrastructure.repository;
 
 import br.com.fiap.techchallange.ordermanagement.adapters.gateways.repository.IOrderRepository;
+import br.com.fiap.techchallange.ordermanagement.adapters.gateways.repository.IOrderRepositorySQL;
 import br.com.fiap.techchallange.ordermanagement.core.entity.Order;
 import br.com.fiap.techchallange.ordermanagement.core.entity.vo.Item;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -19,18 +19,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+import static org.assertj.core.api.Fail.fail;
+
 @Repository
-public class MySQLOrderRepository implements IOrderRepository {
+@ConditionalOnProperty(name = "spring.database.sql.enabled", havingValue = "true")
+public class MySQLOrderRepository implements IOrderRepositorySQL {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Autowired
     public MySQLOrderRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Value("${spring.custom.db-type}")
-    private String dbType;  // Injeta o tipo de banco de dados
+    private String dbType;
 
     public String getTableName(String tableName) {
         if ("mysql".equalsIgnoreCase(dbType)) {
@@ -42,7 +44,7 @@ public class MySQLOrderRepository implements IOrderRepository {
 
     @Transactional
     @Override
-    public Order create(Order order) {
+    public void create(Order order) {
         String sql = "INSERT INTO dbtechchallange." + getTableName("order") + " (id, number_order, status) values (:id, :number_order, :status)";
 
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -51,9 +53,7 @@ public class MySQLOrderRepository implements IOrderRepository {
         params.addValue("status", order.getStatus());
         namedParameterJdbcTemplate.update(sql, params);
 
-        addItem(order.getItems());
-
-        return order;
+        addItem(order.getId(), order.getItems());
     }
 
     @Override
@@ -75,16 +75,19 @@ public class MySQLOrderRepository implements IOrderRepository {
         namedParameterJdbcTemplate.update(sql.toString(), params);
     }
 
-
     @Transactional
-    @Override
-    public void addItem(List<Item> items){
-
-        String sql = "INSERT INTO dbtechchallange." + getTableName("item") + "  (order_id, sku, quantity, unit_value) values (:order_id, :sku, :quantity, :unitValue)";
+    private void addItem(String orderId, List<Item> items){
+        String sql = "INSERT INTO dbtechchallange." + getTableName("item") + " (order_id, sku, quantity, unit_value) " +
+                "VALUES (:orderId, :sku, :quantity, :unitValue)";
 
         SqlParameterSource[] batch = new SqlParameterSource[items.size()];
         for (int i = 0; i < items.size(); i++) {
-            batch[i] = new BeanPropertySqlParameterSource(items.get(i));
+            MapSqlParameterSource param = new MapSqlParameterSource();
+            param.addValue("orderId", orderId);
+            param.addValue("sku", items.get(i).getSku());
+            param.addValue("quantity", items.get(i).getQuantity());
+            param.addValue("unitValue", items.get(i).getUnitValue());
+            batch[i] = param;
         }
 
         namedParameterJdbcTemplate.batchUpdate(sql, batch);
@@ -112,11 +115,11 @@ public class MySQLOrderRepository implements IOrderRepository {
     @Override
     public List<Order> getOrders() {
         String sql = "SELECT * FROM dbtechchallange." + getTableName("order") + " \n" +
-                     "WHERE status IN ('Recebido', 'Em Preparacao', 'Pronto')\n" +
+                     "WHERE status IN ('Recebido', 'EmPreparacao', 'Pronto')\n" +
                      "ORDER BY \n" +
                      "  CASE \n" +
                      "    WHEN status = 'Pronto' THEN 1\n" +
-                     "    WHEN status = 'Em Preparacao' THEN 2\n" +
+                     "    WHEN status = 'EmPreparacao' THEN 2\n" +
                      "    WHEN status = 'Recebido' THEN 3    \n" +
                      "  END,\n" +
                      "  number_order ASC; ";
@@ -146,6 +149,9 @@ public class MySQLOrderRepository implements IOrderRepository {
         }
     }
 
+    @Override
+    public void clearDB() { }
+
     @Transactional
     @Override
     public Order get(String ordemId) {
@@ -169,14 +175,14 @@ public class MySQLOrderRepository implements IOrderRepository {
 
 
     private List<Item> getItems(String ordemId){
-        String sql = "SELECT * FROM dbtechchallange." + getTableName("order") + " WHERE order_id = :ordemId";
+        String sql = "SELECT * FROM dbtechchallange." + getTableName("item") + " WHERE order_id = :ordemId";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("ordemId", ordemId);
         List<Item> items = new ArrayList<>();
 
         namedParameterJdbcTemplate.query(sql, params, new RowCallbackHandler() {
             public void processRow(@NotNull ResultSet rs) throws SQLException {
-                items.add(new Item(ordemId, rs.getString("sku"), rs.getInt("quantity"), rs.getFloat("unit_value")));
+                items.add(new Item(rs.getString("sku"), rs.getInt("quantity"), rs.getFloat("unit_value")));
             }
         });
         return items;

@@ -8,15 +8,15 @@ import br.com.fiap.techchallange.ordermanagement.core.usecase.dto.order.OutputDa
 import br.com.fiap.techchallange.ordermanagement.core.usecase.inputboundary.tracking.IEventListenerOrder;
 import br.com.fiap.techchallange.ordermanagement.core.usecase.outputboundary.presenters.tracking.IDisplayInformationOrderPresenter;
 
-public class OrderUpdateStatusUseCase implements IEventListenerOrder {
+public class OrderUpdateStatus implements IEventListenerOrder {
 
     private final IOrderRepository orderRepository;
     private final IDisplayInformationOrderPresenter displayInformationOrderPresenter;
 
 
 
-    public OrderUpdateStatusUseCase(IOrderRepository orderRepository,
-                                    IDisplayInformationOrderPresenter displayInformationOrderPresenter){
+    public OrderUpdateStatus(IOrderRepository orderRepository,
+                             IDisplayInformationOrderPresenter displayInformationOrderPresenter){
         this.orderRepository = orderRepository;
         this.displayInformationOrderPresenter = displayInformationOrderPresenter;
     }
@@ -32,6 +32,11 @@ public class OrderUpdateStatusUseCase implements IEventListenerOrder {
             // Quando o idOrder é igual a null, significa que o evento foi disparado pelos serviços posteriores ao pagamento
            order = this.orderRepository.getByOrderNumber(eventOrder.number_order());
         }
+
+        if (order == null){
+            return;
+        }
+
         order.updateStatus(status);
         this.orderRepository.update(order);
         displayInformationOrderPresenter.display(new OutputDataOrderDTO(order.getId(),
@@ -44,7 +49,8 @@ public class OrderUpdateStatusUseCase implements IEventListenerOrder {
         StatusOrder status;
 
         switch (eventProcessing){
-            case "payment" : status = StatusOrder.RECEIVED; break;
+            case "paymentApprove" : status = StatusOrder.RECEIVED; break;
+            case "paymentDenied" : status = StatusOrder.CANCELED; break;
             case "preparationFood" : status = StatusOrder.INPREPARATION; break;
             case "foodDone" : status = StatusOrder.FOODDONE; break;
             case "deliveryFood" : status = StatusOrder.FINISHED; break;

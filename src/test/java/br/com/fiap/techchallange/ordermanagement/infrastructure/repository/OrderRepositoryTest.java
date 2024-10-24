@@ -3,17 +3,18 @@ package br.com.fiap.techchallange.ordermanagement.infrastructure.repository;
 import br.com.fiap.techchallange.ordermanagement.adapters.gateways.repository.IOrderRepository;
 import br.com.fiap.techchallange.ordermanagement.core.entity.Order;
 import br.com.fiap.techchallange.ordermanagement.core.entity.enums.StatusOrder;
-import br.com.fiap.techchallange.ordermanagement.core.entity.vo.Item;
+import br.com.fiap.techchallange.ordermanagement.util.OrderHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
+import static br.com.fiap.techchallange.ordermanagement.util.OrderHelper.generateOrder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -34,80 +35,112 @@ public class OrderRepositoryTest {
         openMocks.close();
     }
 
-    private Order gerarPedido(int numberOrder, StatusOrder status){
-        //GIVEN
-        String idOrder  = "fd0b97c0-3334-4c8e-9d83-ae971b77db99";
-        Random random = new Random();
+    @Nested
+    public class Criacao{
+        @Test
+        public void deveCriarPedido(){
+            //GIVEN
+            Order order = OrderHelper.generateOrder(1, StatusOrder.OPEN);
+            when(orderRepository.get(any(String.class))).thenReturn(order);
 
+            //WHEN
+            orderRepository.create(order);
+            Order orderArmazenada = orderRepository.get(order.getId());
 
-        Item item1 = new Item(idOrder, "123456A", 2, 35);
-        Item item2 = new Item(idOrder, "123456B", 1, 15);
+            //THEN
+            assertThat(orderArmazenada)
+                    .isNotNull()
+                    .isEqualTo(order);
 
-        List<Item> items = new ArrayList<>();
+            verify(orderRepository, times(1)).create(any(Order.class));
+        }
+    }
 
-        items.add(item1);
-        items.add(item2);
+    @Nested
+    public class Atualizacao{
+        @Test
+        public void deveAtualizarPedidoParaRecebido(){
+            //GIVEN
+            Order order = OrderHelper.generateOrder(1, StatusOrder.OPEN);
+            when(orderRepository.get(any(String.class))).thenReturn(order);
 
-        return new Order(idOrder, numberOrder, items, status.getValue());
+            //WHEN
+            orderRepository.create(order);
+            Order orderArmazenada = orderRepository.get(order.getId());
+            order.updateStatus(StatusOrder.RECEIVED);
+            orderRepository.update(order);
+
+            //THEN
+            assertThat(orderArmazenada)
+                    .isNotNull()
+                    .isEqualTo(order);
+
+            verify(orderRepository, times(1)).create(any(Order.class));
+        }
+
+        @Test
+        public void deveAtualizarPedidoParaCancelado(){
+            //GIVEN
+            Order order = OrderHelper.generateOrder(1, StatusOrder.OPEN);
+            when(orderRepository.get(any(String.class))).thenReturn(order);
+
+            //WHEN
+            orderRepository.create(order);
+            Order orderArmazenada = orderRepository.get(order.getId());
+            order.updateStatus(StatusOrder.CANCELED);
+            orderRepository.update(order);
+
+            //THEN
+            assertThat(orderArmazenada)
+                    .isNotNull()
+                    .isEqualTo(order);
+
+            verify(orderRepository, times(1)).create(any(Order.class));
+        }
     }
 
 
-    @Test
-    public void deveCriarPedido(){
-        //GIVEN
-        Order order = gerarPedido(1, StatusOrder.OPEN);
-        when(orderRepository.create(any(Order.class))).thenReturn(order);
+    @Nested
+    public class Consulta{
+        @Test
+        public void deveBuscarListaDePedidosEmAtendimento(){
+            //GIVEN
+            List<Order> pedidos = new ArrayList<>();
+            pedidos.add(OrderHelper.generateOrder(1, StatusOrder.RECEIVED));
+            pedidos.add(OrderHelper.generateOrder(2, StatusOrder.INPREPARATION));
 
-        //WHEN
-        Order orderArmazenada = orderRepository.create(order);
+            when(orderRepository.getOrders()).thenReturn(pedidos);
 
+            // WHEN
+            List<Order> pedidosRetornados = orderRepository.getOrders();
 
-        //THEN
-        assertThat(orderArmazenada)
-                .isNotNull()
-                .isEqualTo(order);
+            //THEN
+            assertThat(pedidosRetornados)
+                    .asList()
+                    .hasSize(2);
 
-        verify(orderRepository, times(1)).create(any(Order.class));
-    }
+            verify(orderRepository, times(1)).getOrders();
+        }
 
-    @Test
-    public void deveBuscarListaDePedidosEmAtendimento(){
-        //GIVEN
-        List<Order> pedidos = new ArrayList<>();
-        pedidos.add(gerarPedido(1, StatusOrder.RECEIVED));
-        pedidos.add(gerarPedido(2, StatusOrder.INPREPARATION));
+        @Test
+        public void deveBuscarPedidosPeloNumero(){
+            //GIVEN
+            List<Order> pedidos = new ArrayList<>();
 
-        when(orderRepository.getOrders()).thenReturn(pedidos);
+            Order pedido1 = OrderHelper.generateOrder(1, StatusOrder.RECEIVED);
+            Order pedido2 = OrderHelper.generateOrder(2, StatusOrder.INPREPARATION);
 
-        // WHEN
-        List<Order> pedidosRetornados = orderRepository.getOrders();
+            when(orderRepository.getByOrderNumber(2)).thenReturn(pedido2);
 
-        //THEN
-        assertThat(pedidosRetornados)
-                .asList()
-                .hasSize(2);
+            // WHEN
+            Order pedidosRetornados = orderRepository.getByOrderNumber(2);
 
-        verify(orderRepository, times(1)).getOrders();
-    }
+            //THEN
+            assertThat(pedidosRetornados)
+                    .isNotNull()
+                    .isEqualTo(pedido2);
 
-    @Test
-    public void deveBuscarPedidosPeloNumero(){
-        //GIVEN
-        List<Order> pedidos = new ArrayList<>();
-
-        Order pedido1 = gerarPedido(1, StatusOrder.RECEIVED);
-        Order pedido2 = gerarPedido(2, StatusOrder.INPREPARATION);
-
-        when(orderRepository.getByOrderNumber(2)).thenReturn(pedido2);
-
-        // WHEN
-        Order pedidosRetornados = orderRepository.getByOrderNumber(2);
-
-        //THEN
-        assertThat(pedidosRetornados)
-                .isNotNull()
-                .isEqualTo(pedido2);
-
-        verify(orderRepository, times(1)).getByOrderNumber(2);
+            verify(orderRepository, times(1)).getByOrderNumber(2);
+        }
     }
 }

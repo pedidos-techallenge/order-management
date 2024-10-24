@@ -8,11 +8,11 @@ import br.com.fiap.techchallange.ordermanagement.core.usecase.inputboundary.trac
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderListingUseCase implements IOrderListingUseCase {
+public class OrderListing implements IOrderListingUseCase {
 
     private final IOrderRepository orderRepository;
 
-    public OrderListingUseCase(IOrderRepository orderRepository){
+    public OrderListing(IOrderRepository orderRepository){
         this.orderRepository =  orderRepository;
     }
 
@@ -25,5 +25,11 @@ public class OrderListingUseCase implements IOrderListingUseCase {
         }
 
         return ordersDTO;
+    }
+
+    @Override
+    public OutputDataOrderDTO invoke(String idOrder) {
+        Order order = this.orderRepository.get(idOrder);
+        return new OutputDataOrderDTO(order.getId(), order.getNumberOrder(), order.getStatus());
     }
 }

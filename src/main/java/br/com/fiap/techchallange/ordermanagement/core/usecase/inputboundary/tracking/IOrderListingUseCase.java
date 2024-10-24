@@ -7,4 +7,5 @@ import java.util.List;
 public interface IOrderListingUseCase {
 
     public List<OutputDataOrderDTO> invoke();
+    public OutputDataOrderDTO invoke(String idOrder);
 }
