@@ -15,6 +15,7 @@ import io.cucumber.java.pt.Entao;
 import io.cucumber.java.pt.Quando;
 import io.restassured.response.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Objects;
 
@@ -38,7 +39,6 @@ public class StepDefinition {
     public StepDefinition(SharedData sharedData) {
         this.sharedData = sharedData;
     }
-
 
     private String ENDPOINT_ORDERS = "http://localhost:8080/v1/order";
 
@@ -70,7 +70,7 @@ public class StepDefinition {
 
         assertFalse(Objects.requireNonNull(result).getMessageId().isBlank());
 
-        Thread.sleep(1000);
+        Thread.sleep(2000);
     }
 
     @Entao("o pedido deverá ser atualizado para Recebido")
@@ -86,11 +86,12 @@ public class StepDefinition {
     }
 
     @Quando("atendente clicar no pedido")
-    public void atendente_clicar_pedido() {
+    public void atendente_clicar_pedido() throws InterruptedException {
         response = given()
                   .when()
                     .put(ENDPOINT_ORDERS + "/operation/preparation/" + sharedData.getNumber_order());
         assertEquals(202, (response.getStatusCode()));
+        Thread.sleep(2000);
     }
 
 
@@ -187,5 +188,4 @@ public class StepDefinition {
 
         return sqs.sendMessage(sendMsgRequest);
     }
-
 }

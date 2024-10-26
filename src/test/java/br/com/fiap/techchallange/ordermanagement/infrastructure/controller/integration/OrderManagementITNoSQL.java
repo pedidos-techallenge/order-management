@@ -1,33 +1,30 @@
 package br.com.fiap.techchallange.ordermanagement.infrastructure.controller.integration;
 
 
+
 import br.com.fiap.techchallange.ordermanagement.core.usecase.dto.order.InputDataOrderDTO;
 import br.com.fiap.techchallange.ordermanagement.core.usecase.dto.order.OutputDataOrderDTO;
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
+import org.springframework.test.context.junit.jupiter.DisabledIf;
 
 import static br.com.fiap.techchallange.ordermanagement.util.OrderHelper.generateOrderDTO;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
-
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@SpringJUnitConfig
-@ComponentScan
-@Sql(scripts = {"/insertorder.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-public class OrderManagementIT {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DisabledIf(expression = "#{environment['spring.database.sql.enabled'] == 'true'}")
+public class OrderManagementITNoSQL {
 
     @LocalServerPort
     private int port;

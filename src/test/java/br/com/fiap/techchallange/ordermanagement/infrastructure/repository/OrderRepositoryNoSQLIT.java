@@ -1,15 +1,20 @@
 package br.com.fiap.techchallange.ordermanagement.infrastructure.repository;
 
+import br.com.fiap.techchallange.ordermanagement.OrdermanagementApplication;
 import br.com.fiap.techchallange.ordermanagement.adapters.gateways.repository.IOrderRepositoryNoSQL;
 import br.com.fiap.techchallange.ordermanagement.core.entity.Order;
 import br.com.fiap.techchallange.ordermanagement.core.entity.enums.StatusOrder;
 import br.com.fiap.techchallange.ordermanagement.core.entity.vo.Item;
+import br.com.fiap.techchallange.ordermanagement.infrastructure.config.gateways.repository.RepositoryNoSQLConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.DisabledIf;
 
 import java.util.ArrayList;
@@ -19,7 +24,7 @@ import java.util.UUID;
 import static br.com.fiap.techchallange.ordermanagement.util.OrderHelper.generateOrder;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataMongoTest
+@SpringBootTest(classes = OrdermanagementApplication.class)
 @ActiveProfiles("test")
 @DisabledIf(expression = "#{environment['spring.database.sql.enabled'] == 'true'}")
 public class OrderRepositoryNoSQLIT {

@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = {"br.com.fiap.techchallange.ordermanagement.infrastructure.adapters",
 							   "br.com.fiap.techchallange.ordermanagement.infrastructure.factory",
 							   "br.com.fiap.techchallange.ordermanagement.infrastructure.config",
@@ -16,6 +15,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 							   "br.com.fiap.techchallange.ordermanagement.infrastructure.controller",
 							   "br.com.fiap.techchallange.ordermanagement.infrastructure.queue"
 } )
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class OrdermanagementApplication {
 
 	public static void main(String[] args) {

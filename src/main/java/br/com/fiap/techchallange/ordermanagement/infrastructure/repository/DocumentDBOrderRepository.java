@@ -75,11 +75,10 @@ public class DocumentDBOrderRepository implements IOrderRepositoryNoSQL {
         }
     }
 
-
     @Override
     public int getLastNumber() {
         Query query = new Query();
-        query.with(Sort.by(Sort.Direction.DESC, "orderNumber"));
+        query.with(Sort.by(Sort.Direction.DESC, "numberOrder"));
         query.limit(1);
         Order order = mongoTemplate.findOne(query, Order.class);
         return (order != null) ? order.getNumberOrder() : 0;

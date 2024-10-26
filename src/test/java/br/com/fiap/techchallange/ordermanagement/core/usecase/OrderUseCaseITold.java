@@ -1,5 +1,6 @@
 package br.com.fiap.techchallange.ordermanagement.core.usecase;
 
+import br.com.fiap.techchallange.ordermanagement.OrdermanagementApplication;
 import br.com.fiap.techchallange.ordermanagement.adapters.gateways.repository.IOrderRepository;
 import br.com.fiap.techchallange.ordermanagement.core.entity.Order;
 import br.com.fiap.techchallange.ordermanagement.core.entity.enums.StatusOrder;
@@ -28,9 +29,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,12 +40,11 @@ import static br.com.fiap.techchallange.ordermanagement.util.OrderHelper.generat
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
+@SpringBootTest(classes = OrdermanagementApplication.class)
 @AutoConfigureTestDatabase
-@Transactional
 @ActiveProfiles("test")
-@ComponentScan
-public class OrderUseCaseIT {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+public class OrderUseCaseITold {
 
     private IFinishOrderSelectionUseCase finishSelection;
     private IPaymentProcessingUseCase paymentOrder;

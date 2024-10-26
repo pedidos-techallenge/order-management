@@ -13,5 +13,5 @@ import org.springframework.test.context.ContextConfiguration;
 @SelectClasspathResource("features")
 @CucumberContextConfiguration
 @ContextConfiguration(classes = { CucumberSpringConfig.class, SharedData.class })
-public class CucumberTest {
+public class CucumberSystem {
 }
