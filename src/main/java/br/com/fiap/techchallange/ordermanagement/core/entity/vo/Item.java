@@ -4,23 +4,16 @@ import java.io.Serializable;
 
 public class Item implements Serializable {
 
-    String order_id;
     String sku;
     Integer quantity;
     float unitValue;
     float amount;
 
-    public Item(String order_id, String sku, Integer quantity, float unitValue) {
-
-        this.order_id = order_id;
+    public Item( String sku, Integer quantity, float unitValue) {
         this.sku = sku;
         this.unitValue = unitValue;
         this.setQuantity(quantity);
         this.setAmount();
-    }
-
-    public String getOrder_id() {
-        return order_id;
     }
 
     public String getSku() {
@@ -44,10 +37,6 @@ public class Item implements Serializable {
             this.quantity = quantity;
     }
 
-    private void setSKU(String sku){
-        this.sku = sku;
-    }
-
     public float getAmount() {
         return amount;
     }
@@ -55,5 +44,4 @@ public class Item implements Serializable {
     private void setAmount() {
         this.amount = this.unitValue * this.quantity ;
     }
-
 }

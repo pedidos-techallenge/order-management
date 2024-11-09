@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566" # Porta principal para todos os serviços
+      - "4571:4571" # Porta específica do SQS, se necessário
+    environment:
+      - SERVICES=sqs
+      - DEFAULT_REGION=us-east-1
+    volumes:
+      - "./localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    networks:
+      - mongo-network
+
+volumes:
+  mongo-data:
+    driver: local
+
+networks:
+  mongo-network:
+    driver: bridge

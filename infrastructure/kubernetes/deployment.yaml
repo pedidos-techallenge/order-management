@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-management
+  template:
+    metadata:
+      labels:
+        app: order-management
+    spec:
+      containers:
+      - name: order-management
+        image: ederpsilva/ordermanagement:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: order-management-secrets
+        - configMapRef:
+            name: order-management-config
+      resources:
+        limits:
+          cpu: "1"
+          memory: "1Gi"
+        requests:
+          cpu: "500m"
+          memory: "512Mi"

@@ -7,7 +7,7 @@ public record EventOrder(int number_order, String process, String idOrder) {
     }
 
     public enum TypeEventOrder {
-        PAYMENT("payment"), PREPARATIONFOOD("preparationFood"), FOODDONE("foodDone"), DELIVERYFOOD("deliveryFood");
+        PAYMENTAPPROVE("paymentApprove"), PAYMENTDENIED("paymentDenied"), PREPARATIONFOOD("preparationFood"), FOODDONE("foodDone"), DELIVERYFOOD("deliveryFood");
 
         private final String value;
 

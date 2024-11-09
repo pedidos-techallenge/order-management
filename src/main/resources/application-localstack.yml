@@ -1,0 +1,8 @@
+cloud:
+  aws:
+    sqs:
+      enabled: true
+    endpoint:
+      uri: http://localhost:4566 # URL do LocalStack
+    region:
+      static: us-east-1

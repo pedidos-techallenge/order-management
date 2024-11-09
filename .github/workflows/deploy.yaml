@@ -1,0 +1,109 @@
+name: Deploy to EKS with Terraform
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+  TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
+  AWS_DEFAULT_REGION: us-east-1
+  EKS_CLUSTER_NAME: seu-cluster-name
+  ECR_REPOSITORY: techchallenge-ect
+  IMAGE_TAG: ${{ github.sha }}
+
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Initialize Terraform for MongoDB
+        working-directory: ./infrastructure/terraform
+        run: terraform init -backend-config="bucket=${TF_STATE_BUCKET}" -backend-config="key=mongodb.tfstate" -backend-config="region=us-east-1"
+
+      - name: Plan Terraform changes for MongoDB
+        working-directory: ./infrastructure/terraform
+        run: terraform plan -out=tfplan
+
+      - name: Apply Terraform changes for MongoDB
+        working-directory: ./infrastructure/terraform
+        run: terraform apply -input=false tfplan
+  
+  deploy:
+    needs: terraform
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Update kube config
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Create Secret manifest
+        run: |
+          cat << EOF > k8s/secret.yaml
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: order-management-secrets
+          type: Opaque
+          data:
+            MONGODB_URI: $(echo -n "${{ secrets.MONGODB_URI }}" | base64)
+            AWS_ACCESS_KEY_ID: $(echo -n "${{ secrets.AWS_ACCESS_KEY_ID }}" | base64)
+            AWS_SECRET_ACCESS_KEY: $(echo -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" | base64)
+            AWS_SESSION_TOKEN: $(echo -n "${{ secrets.AWS_SESSION_TOKEN }}" | base64)
+            SQS_MAIN_QUEUE_URL: $(echo -n "${{ secrets.SQS_MAIN_QUEUE_URL }}" | base64)
+            SQS_DLQ_URL: $(echo -n "${{ secrets.SQS_DLQ_URL }}" | base64)
+          EOF
+
+      - name: Create ConfigMap manifest
+        run: |
+          cat << EOF > k8s/configmap.yaml
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: order-management-config
+          data:
+            AWS_REGION: "${{ env.AWS_REGION }}"
+          EOF
+
+      - name: Deploy to EKS
+        run: |
+          kubectl apply -f k8s/secret.yaml
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl rollout status deployment/order-management

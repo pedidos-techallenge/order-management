@@ -5,9 +5,9 @@ import br.com.fiap.techchallange.ordermanagement.core.usecase.inputboundary.trac
 import br.com.fiap.techchallange.ordermanagement.core.usecase.inputboundary.tracking.IGetLatestOrderNumberUseCase;
 import br.com.fiap.techchallange.ordermanagement.core.usecase.inputboundary.tracking.IOrderListingUseCase;
 import br.com.fiap.techchallange.ordermanagement.core.usecase.outputboundary.presenters.tracking.IDisplayInformationOrderPresenter;
-import br.com.fiap.techchallange.ordermanagement.core.usecase.tracking.GetLatestOrderNumberUseCase;
-import br.com.fiap.techchallange.ordermanagement.core.usecase.tracking.OrderListingUseCase;
-import br.com.fiap.techchallange.ordermanagement.core.usecase.tracking.OrderUpdateStatusUseCase;
+import br.com.fiap.techchallange.ordermanagement.core.usecase.tracking.GetLatestOrderNumber;
+import br.com.fiap.techchallange.ordermanagement.core.usecase.tracking.OrderListing;
+import br.com.fiap.techchallange.ordermanagement.core.usecase.tracking.OrderUpdateStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,16 +17,16 @@ public class TrackingUseCaseConfig {
     @Bean
     public IEventListenerOrder getListenerOrder(IOrderRepository orderRepository,
                                                 IDisplayInformationOrderPresenter displayInformationOrderPresenter){
-        return new OrderUpdateStatusUseCase(orderRepository, displayInformationOrderPresenter);
+        return new OrderUpdateStatus(orderRepository, displayInformationOrderPresenter);
     }
 
     @Bean
     public IOrderListingUseCase getOrderListingUseCase(IOrderRepository orderRepository){
-        return new OrderListingUseCase(orderRepository);
+        return new OrderListing(orderRepository);
     }
 
     @Bean
     public IGetLatestOrderNumberUseCase getLatestOrderNumberUseCase(IOrderRepository orderRepository){
-        return new GetLatestOrderNumberUseCase(orderRepository);
+        return new GetLatestOrderNumber(orderRepository);
     }
 }

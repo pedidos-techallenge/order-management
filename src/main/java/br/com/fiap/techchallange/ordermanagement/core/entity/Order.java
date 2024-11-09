@@ -2,6 +2,7 @@ package br.com.fiap.techchallange.ordermanagement.core.entity;
 
 import br.com.fiap.techchallange.ordermanagement.core.entity.enums.StatusOrder;
 import br.com.fiap.techchallange.ordermanagement.core.entity.exceptions.ChangeNotAllowedOrderException;
+import br.com.fiap.techchallange.ordermanagement.core.entity.exceptions.OrderWithoutItemsException;
 import br.com.fiap.techchallange.ordermanagement.core.entity.vo.Item;
 
 import java.io.*;
@@ -19,6 +20,8 @@ public class Order implements Serializable {
     float amount;
     Map<String, Integer> sequenceStatus;
 
+    public Order(){}
+
     public Order(String id){
         this.id = id;
         this.numberOrder = 0;
@@ -30,6 +33,10 @@ public class Order implements Serializable {
     }
 
     public Order(String id, List<Item> items){
+
+        if (items.isEmpty())
+            throw new OrderWithoutItemsException("Pedido sem items adicionados!");
+
         this.id = id;
         this.setItems(items);
         this.numberOrder = 0;
@@ -63,6 +70,7 @@ public class Order implements Serializable {
     private void loadSequenceStatus(){
         sequenceStatus.put(StatusOrder.OPEN.getValue(), 1);
         sequenceStatus.put(StatusOrder.RECEIVED.getValue(), 2);
+        sequenceStatus.put(StatusOrder.CANCELED.getValue(), 2);
         sequenceStatus.put(StatusOrder.INPREPARATION.getValue(), 3);
         sequenceStatus.put(StatusOrder.FOODDONE.getValue(), 4);
         sequenceStatus.put(StatusOrder.FINISHED.getValue(), 5);
@@ -77,7 +85,7 @@ public class Order implements Serializable {
 
     public void updateStatus(StatusOrder statusOrder) {
 
-        if(statusOrder.equals(StatusOrder.OPEN) || (statusOrder.equals(StatusOrder.RECEIVED))) {
+        if((this.status.equals(StatusOrder.CANCELED.getValue()))) {
             throw new ChangeNotAllowedOrderException("Alteração de status não permitido");
         }
 
@@ -125,7 +133,7 @@ public class Order implements Serializable {
         List<Item> copyItems = new ArrayList<>();
 
         for (Item item : items) {
-            copyItems.add(new Item(id, item.getSku(), item.getQuantity(), item.getUnitValue()));
+            copyItems.add(new Item(id, item.getQuantity(), item.getUnitValue()));
         }
 
         return copyItems;

@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface IOrderListingController {
     public List<OutputDataOrderDTO> invoke();
+    public OutputDataOrderDTO invoke(String idOrder);
 }

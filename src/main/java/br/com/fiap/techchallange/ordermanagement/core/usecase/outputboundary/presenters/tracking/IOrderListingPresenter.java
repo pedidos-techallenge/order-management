@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface IOrderListingPresenter {
     public List<OrderViewModel> invoke(List<OutputDataOrderDTO> ordersDTO);
+    public OrderViewModel invoke(OutputDataOrderDTO ordersDTO);
 }
