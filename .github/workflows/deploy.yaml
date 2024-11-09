@@ -15,6 +15,9 @@ env:
   AWS_DEFAULT_REGION: us-east-1
   EKS_CLUSTER_NAME: seu-cluster-name
   ECR_REPOSITORY: techchallenge-ect
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  SQS_MAIN_QUEUE_URL: ${{ secrets.SQS_MAIN_QUEUE_URL }}
+  SQS_DLQ_URL: ${{ secrets.SQS_DLQ_URL }}
   IMAGE_TAG: ${{ github.sha }}
 
 
@@ -52,9 +55,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR
@@ -70,7 +73,7 @@ jobs:
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
       - name: Update kube config
-        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Create Secret manifest
         run: |
@@ -81,12 +84,12 @@ jobs:
             name: order-management-secrets
           type: Opaque
           data:
-            MONGODB_URI: $(echo -n "${{ secrets.MONGODB_URI }}" | base64)
-            AWS_ACCESS_KEY_ID: $(echo -n "${{ secrets.AWS_ACCESS_KEY_ID }}" | base64)
-            AWS_SECRET_ACCESS_KEY: $(echo -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" | base64)
-            AWS_SESSION_TOKEN: $(echo -n "${{ secrets.AWS_SESSION_TOKEN }}" | base64)
-            SQS_MAIN_QUEUE_URL: $(echo -n "${{ secrets.SQS_MAIN_QUEUE_URL }}" | base64)
-            SQS_DLQ_URL: $(echo -n "${{ secrets.SQS_DLQ_URL }}" | base64)
+            MONGODB_URI: $(echo -n "${{ env.MONGODB_URI }}" | base64)
+            AWS_ACCESS_KEY_ID: $(echo -n "${{ env.AWS_ACCESS_KEY_ID }}" | base64)
+            AWS_SECRET_ACCESS_KEY: $(echo -n "${{ env.AWS_SECRET_ACCESS_KEY }}" | base64)
+            AWS_SESSION_TOKEN: $(echo -n "${{ env.AWS_SESSION_TOKEN }}" | base64)
+            SQS_MAIN_QUEUE_URL: $(echo -n "${{ env.SQS_MAIN_QUEUE_URL }}" | base64)
+            SQS_DLQ_URL: $(echo -n "${{ env.SQS_DLQ_URL }}" | base64)
           EOF
 
       - name: Create ConfigMap manifest
@@ -97,7 +100,7 @@ jobs:
           metadata:
             name: order-management-config
           data:
-            AWS_REGION: "${{ env.AWS_REGION }}"
+            AWS_REGION: "${{ env.AWS_DEFAULT_REGION }}"
           EOF
 
       - name: Deploy to EKS
