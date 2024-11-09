@@ -28,13 +28,18 @@ spring:
       hibernate:
         format_sql: true
 
-  cloud:
-    aws:
-      region:
-        static: us-east-1
-      credentials:
-        access-key: test
-        secret-key: test
-      sqs:
-        endpoint: http://localhost:4566
-        region: us-east-1
+cloud:
+  aws:
+    region:
+      static: us-east-1
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+      session-token: ${AWS_SESSION_TOKEN}
+    sqs:
+      main-queue:
+        name: payment-order-main
+        url: ${SQS_MAIN_QUEUE_URL}
+      dlq:
+        name: payment-order-dlq
+        url: ${SQS_DLQ_URL}

@@ -1,12 +1,10 @@
 package br.com.fiap.techchallange.ordermanagement.bdd;
 
-
 import br.com.fiap.techchallange.ordermanagement.adapters.presenters.viewmodel.OrderViewModel;
 import br.com.fiap.techchallange.ordermanagement.core.usecase.dto.order.InputDataOrderDTO;
-import br.com.fiap.techchallange.ordermanagement.core.usecase.dto.order.OutputDataOrderDTO;
 import br.com.fiap.techchallange.ordermanagement.util.OrderHelper;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
@@ -15,23 +13,26 @@ import io.cucumber.java.pt.Entao;
 import io.cucumber.java.pt.Quando;
 import io.restassured.response.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.test.context.ActiveProfiles;
+import io.github.cdimascio.dotenv.Dotenv;
 
 import java.util.Objects;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ActiveProfiles("test")
 public class StepDefinition {
 
     private Response response;
 
-    private OutputDataOrderDTO orderResponse;
-
     private InputDataOrderDTO inputDataOrderDTO;
 
-
     private SharedData sharedData;
+
+    @Autowired
+    private Environment env;
 
     public StepDefinition(){}
 
@@ -171,14 +172,40 @@ public class StepDefinition {
     }
 
     private SendMessageResult send_message(String idOrder, String status){
-        String accessKey = "YOUR_ACCESS_KEY";
-        String secretKey = "YOUR_SECRET_KEY";
-        String region = "us-east-1";
-        String queueUrl = "http://localhost:4566/000000000000/payment-order-main";
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()
+                .load();
+
+        String accessKey = System.getenv("AWS_ACCESS_KEY_ID") != null ?
+                System.getenv("AWS_ACCESS_KEY_ID") :
+                dotenv.get("AWS_ACCESS_KEY_ID");
+                
+        String secretKey = System.getenv("AWS_SECRET_ACCESS_KEY") != null ?
+                System.getenv("AWS_SECRET_ACCESS_KEY") :
+                dotenv.get("AWS_SECRET_ACCESS_KEY");
+                
+        String sessionToken = System.getenv("AWS_SESSION_TOKEN") != null ? 
+                System.getenv("AWS_SESSION_TOKEN") : 
+                dotenv.get("AWS_SESSION_TOKEN");
+                
+        String region = System.getenv("AWS_REGION") != null ? 
+                System.getenv("AWS_REGION") : 
+                dotenv.get("AWS_REGION");
+                
+        String queueUrl = System.getenv("SQS_MAIN_QUEUE_URL") != null ? 
+                System.getenv("SQS_MAIN_QUEUE_URL") : 
+                dotenv.get("SQS_MAIN_QUEUE_URL");
+
+        System.out.println("Region: " + region);
+        
+        if (region == null) {
+            throw new IllegalStateException("AWS Region não pode ser null. Verifique a variável de ambiente AWS_REGION");
+        }
 
         AmazonSQS sqs = AmazonSQSClientBuilder.standard()
                 .withRegion(region)
-                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+                .withCredentials(new AWSStaticCredentialsProvider(
+                    new BasicSessionCredentials(accessKey, secretKey, sessionToken)))
                 .build();
 
         String message =  "{'idOrder': '" + idOrder + "', 'statusPayment':" + status + " }";

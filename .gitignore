@@ -32,7 +32,21 @@ build/
 ### VS Code ###
 .vscode/
 *.json
-aws-local/localstack/cache/server.test.pem
-aws-local/localstack/cache/server.test.pem.crt
-aws-local/localstack/cache/server.test.pem.key
-aws-local/localstack/cache/service-catalog-3_8_2_dev40-1_35_39.pickle
+development/aws-local/localstack/cache/server.test.pem
+development/aws-local/localstack/cache/server.test.pem.crt
+development/aws-local/localstack/cache/server.test.pem.key
+development/aws-local/localstack/cache/service-catalog-3_8_2_dev40-1_35_39.pickle
+infrastructure/terraform/.terraform.lock.hcl
+infrastructure/terraform/.terraform/providers/registry.terraform.io/mongodb/mongodbatlas/1.21.4/windows_amd64/terraform-provider-mongodbatlas_v1.21.4.exe
+infrastructure/terraform/.terraform/providers/registry.terraform.io/mongodb/mongodbatlas/1.21.4/windows_amd64/README.md
+infrastructure/terraform/.terraform/providers/registry.terraform.io/mongodb/mongodbatlas/1.21.4/windows_amd64/LICENSE
+infrastructure/terraform/.terraform/providers/registry.terraform.io/mongodb/mongodbatlas/1.21.4/windows_amd64/CHANGELOG.md
+infrastructure/terraform/.terraform/providers/registry.terraform.io/hashicorp/random/3.6.3/windows_amd64/terraform-provider-random_v3.6.3_x5.exe
+infrastructure/terraform/.terraform/providers/registry.terraform.io/hashicorp/random/3.6.3/windows_amd64/LICENSE.txt
+infrastructure/terraform/.terraform/providers/registry.terraform.io/hashicorp/aws/5.74.0/windows_amd64/terraform-provider-aws_v5.74.0_x5.exe
+infrastructure/terraform/.terraform/providers/registry.terraform.io/hashicorp/aws/5.74.0/windows_amd64/LICENSE.txt
+infrastructure/terraform/.terraform/providers/registry.terraform.io/hashicorp/aws/5.73.0/windows_amd64/terraform-provider-aws_v5.73.0_x5.exe
+infrastructure/terraform/.terraform/providers/registry.terraform.io/hashicorp/aws/5.73.0/windows_amd64/LICENSE.txt
+infrastructure/terraform/.terraform/modules/atlas_basic/
+.env
+.env
