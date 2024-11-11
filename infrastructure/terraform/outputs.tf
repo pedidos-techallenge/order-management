@@ -1,10 +1,33 @@
 # Outputs
-output "documentdb_cluster_endpoint" {
-  value = aws_docdb_cluster.documentdb_cluster.endpoint
-  description = "DocumentDB cluster endpoint"
+output "docdb_endpoint" {
+  value = aws_docdb_cluster.docdb.endpoint
 }
 
-output "documentdb_security_group_id" {
-  value = aws_security_group.documentdb_sg.id
-  description = "Security group ID for DocumentDB access"
+output "docdb_credentials" {
+  value = {
+    username = aws_docdb_cluster.docdb.master_username
+    database = "dbtechchallenge"
+  }
+  sensitive = true
+}
+
+output "mongodb_connection_string" {
+  description = "MongoDB Atlas Connection String"
+  value       = format("mongodb+srv://%s:%s@%s",
+    var.mongodb_username,
+    var.mongodb_password,
+    trimprefix(mongodbatlas_cluster.techchallenge.connection_strings[0].standard_srv, "mongodb+srv://")
+  )
+  sensitive   = true
+}
+
+output "mongodb_cluster_host" {
+  description = "MongoDB Atlas Cluster Host"
+  value       = mongodbatlas_cluster.techchallenge.connection_strings[0].standard
+  sensitive   = true
+}
+
+output "mongodb_cluster_state" {
+  description = "MongoDB Atlas Cluster State"
+  value       = mongodbatlas_cluster.techchallenge.state_name
 }

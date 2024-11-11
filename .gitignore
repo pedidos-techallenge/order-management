@@ -50,3 +50,4 @@ infrastructure/terraform/.terraform/providers/registry.terraform.io/hashicorp/aw
 infrastructure/terraform/.terraform/modules/atlas_basic/
 .env
 .env
+.secrets
