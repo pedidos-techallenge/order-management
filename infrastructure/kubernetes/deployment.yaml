@@ -14,18 +14,43 @@ spec:
     spec:
       containers:
       - name: order-management
-        image: ederpsilva/ordermanagement:latest
-        ports:
-        - containerPort: 8080
+        image: ${ECR_REGISTRY}:${IMAGE_TAG}
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prd"
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: order-management-secrets
+              key: MONGODB_URI
+        - name: AWS_REGION
+          value: "us-east-1"
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: order-management-secrets
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: order-management-secrets
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_SESSION_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: order-management-secrets
+              key: AWS_SESSION_TOKEN
         envFrom:
         - secretRef:
             name: order-management-secrets
-        - configMapRef:
-            name: order-management-config
-      resources:
-        limits:
-          cpu: "1"
-          memory: "1Gi"
-        requests:
-          cpu: "500m"
-          memory: "512Mi"
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"

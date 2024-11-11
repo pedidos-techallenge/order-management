@@ -16,97 +16,178 @@ env:
   EKS_CLUSTER_NAME: techchallenge-eks-cluster
   ECR_REPOSITORY: techchallenge-ect
   MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+  MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
   SQS_MAIN_QUEUE_URL: ${{ secrets.SQS_MAIN_QUEUE_URL }}
   SQS_DLQ_URL: ${{ secrets.SQS_DLQ_URL }}
   IMAGE_TAG: ${{ github.sha }}
 
 
 jobs:
-  terraform:
+  mongodb-atlas:
     runs-on: ubuntu-latest
-
+    env:
+      TF_IN_AUTOMATION: "true"
+    outputs:
+      mongodb_connection_string: ${{ steps.get_mongodb_uri.outputs.mongodb_uri }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+      - name: Install Terraform
+        run: |
+          wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt-get update && sudo apt-get install terraform
+
+      - name: Create tfvars file
+        working-directory: ./infrastructure/terraform
+        run: |
+          cat > terraform.tfvars << EOF
+          mongodb_username         = "${{ secrets.MONGODB_USERNAME }}"
+          mongodb_password         = "${{ secrets.MONGODB_PASSWORD }}"
+          mongodb_atlas_org_id     = "${{ secrets.MONGODB_ATLAS_ORG_ID }}"
+          mongodb_atlas_public_key  = "${{ secrets.MONGODB_ATLAS_PUBLIC_KEY }}"
+          mongodb_atlas_private_key = "${{ secrets.MONGODB_ATLAS_PRIVATE_KEY }}"
+          local_ip                 = "${{ secrets.LOCAL_IP }}"
+          EOF
 
       - name: Initialize Terraform for MongoDB
         working-directory: ./infrastructure/terraform
-        run: terraform init -backend-config="bucket=${TF_STATE_BUCKET}" -backend-config="key=mongodb.tfstate" -backend-config="region=us-east-1"
+        run: terraform init -input=false -backend-config="bucket=${TF_STATE_BUCKET}" -backend-config="key=mongodb.tfstate" -backend-config="region=us-east-1"
 
       - name: Plan Terraform changes for MongoDB
         working-directory: ./infrastructure/terraform
-        run: terraform plan -out=tfplan
+        run: terraform plan -input=false -out=tfplan
 
       - name: Apply Terraform changes for MongoDB
         working-directory: ./infrastructure/terraform
-        run: terraform apply -input=false tfplan
-  
-  deploy:
-    needs: terraform
+        run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Wait for MongoDB Cluster and Get URI
+        id: get_mongodb_uri
+        working-directory: ./infrastructure/terraform
+        run: |
+          # Obter a string de conexão SRV
+          CONN_STRING=$(terraform output -raw mongodb_connection_string)
+          
+          # Apenas passar a string base, sem modificações
+          echo "mongodb_uri=${CONN_STRING}" >> $GITHUB_OUTPUT
+
+  deploy-application:
+    needs: mongodb-atlas
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
+          rm awscliv2.zip
+          aws --version
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build and push Docker image to ECR
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      - name: Setup kubectl
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
 
       - name: Update kube config
-        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }}
+        run: aws eks update-kubeconfig --name techchallenge-eks-cluster --region us-east-1
 
       - name: Create Secret manifest
+        env:
+          MONGODB_URI: ${{ needs.mongodb-atlas.outputs.mongodb_connection_string }}
         run: |
-          cat << EOF > k8s/secret.yaml
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: order-management-secrets
-          type: Opaque
-          data:
-            MONGODB_URI: $(echo -n "${{ env.MONGODB_URI }}" | base64)
-            AWS_ACCESS_KEY_ID: $(echo -n "${{ env.AWS_ACCESS_KEY_ID }}" | base64)
-            AWS_SECRET_ACCESS_KEY: $(echo -n "${{ env.AWS_SECRET_ACCESS_KEY }}" | base64)
-            AWS_SESSION_TOKEN: $(echo -n "${{ env.AWS_SESSION_TOKEN }}" | base64)
-            SQS_MAIN_QUEUE_URL: $(echo -n "${{ env.SQS_MAIN_QUEUE_URL }}" | base64)
-            SQS_DLQ_URL: $(echo -n "${{ env.SQS_DLQ_URL }}" | base64)
-          EOF
+          # Criar secret usando diretamente a string do job anterior
+          kubectl create secret generic order-management-secrets \
+            --from-literal=MONGODB_URI="${MONGODB_URI}" \
+            --from-literal=AWS_ACCESS_KEY_ID="${{ env.AWS_ACCESS_KEY_ID }}" \
+            --from-literal=AWS_SECRET_ACCESS_KEY="${{ env.AWS_SECRET_ACCESS_KEY }}" \
+            --from-literal=AWS_SESSION_TOKEN="${{ env.AWS_SESSION_TOKEN }}" \
+            --from-literal=SQS_MAIN_QUEUE_URL="${{ env.SQS_MAIN_QUEUE_URL }}" \
+            --from-literal=SQS_DLQ_URL="${{ env.SQS_DLQ_URL }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Create ConfigMap manifest
+      - name: Create ConfigMap
         run: |
-          cat << EOF > k8s/configmap.yaml
-          apiVersion: v1
-          kind: ConfigMap
-          metadata:
-            name: order-management-config
-          data:
-            AWS_REGION: "${{ env.AWS_DEFAULT_REGION }}"
-          EOF
+          kubectl create configmap app-config \
+            --from-literal=APP_NAME="Tech Challenge" \
+            --from-literal=APP_PORT="8080" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create JWT Secret
+        run: |
+          kubectl create secret generic jwt-secret \
+            --from-literal=JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Install envsubst
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext-base
+
+      - name: Build image
+        run: |
+          # Obter o URI do repositório ECR primeiro
+          ECR_REGISTRY=$(aws ecr describe-repositories --repository-names ${ECR_REPOSITORY} --query 'repositories[0].repositoryUri' --output text)
+          echo "ECR_REGISTRY=${ECR_REGISTRY}" >> $GITHUB_ENV
+          
+          # Build com nome completo da imagem
+          docker build -t ${ECR_REGISTRY}:${IMAGE_TAG} .
+          
+          # Debug
+          echo "Built image: ${ECR_REGISTRY}:${IMAGE_TAG}"
+          docker images
+
+      - name: Login to Amazon ECR
+        run: |
+          # Login no ECR
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
+      - name: Push image to ECR
+        run: |
+          # Push da imagem
+          docker push ${ECR_REGISTRY}:${IMAGE_TAG}
 
       - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: ${{ env.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          kubectl apply -f k8s/secret.yaml
-          kubectl apply -f k8s/configmap.yaml
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          kubectl rollout status deployment/order-management
+          # Debug das variáveis
+          echo "ECR_REGISTRY: ${ECR_REGISTRY}"
+          echo "IMAGE_TAG: ${IMAGE_TAG}"
+          
+          # Remover deployment anterior se existir
+          kubectl delete deployment order-management --ignore-not-found
+          
+          # Substituir variáveis no arquivo deployment
+          envsubst < infrastructure/kubernetes/deployment.yaml > deployment_updated.yaml
+          
+          # Aplicar os manifestos
+          kubectl apply -f deployment_updated.yaml
+          kubectl apply -f infrastructure/kubernetes/service.yaml
+          
+          # Aguardar o deployment
+          kubectl rollout status deployment/order-management --timeout=180s
+          
+          # Debug dos pods
+          echo "Pod status:"
+          kubectl get pods -l app=order-management -o wide
+          
+          # Se houver erro, mostrar logs
+          POD_NAME=$(kubectl get pods -l app=order-management -o jsonpath="{.items[0].metadata.name}")
+          echo "Pod logs:"
+          kubectl logs $POD_NAME
