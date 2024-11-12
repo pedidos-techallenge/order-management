@@ -49,6 +49,55 @@ public class OrderTest {
         }
 
         @Test
+        public void deveCriarOrderSemParametro(){
+            // GIVEN
+            Order order = new Order();
+
+            // WHEN
+            String status = order.getStatus();
+
+            //THEN
+            assertThat(status).isEqualTo(StatusOrder.OPEN.getValue());
+        }
+
+        @Test
+        public void deveSetarNumeroOrder(){
+            // GIVEN
+            Order order = new Order();
+            order.setNumberOrder(1);
+            // WHEN
+            String status = order.getStatus();
+
+            //THEN
+            assertThat(status).isEqualTo(StatusOrder.OPEN.getValue());
+            assertThat(order.getNumberOrder()).isEqualTo(1);
+        }
+
+        @Test
+        public void deveCriarOrderComUmParametro(){
+            // GIVEN
+            Order order = new Order("fd0b97c0-3334-4c8e-9d83-ae971b77db99");
+
+            // WHEN
+            String status = order.getStatus();
+
+            //THEN
+            assertThat(status).isEqualTo(StatusOrder.OPEN.getValue());
+        }
+
+        @Test
+        public void deveCriarOrderComTresParametro(){
+            // GIVEN
+            Order order = new Order("fd0b97c0-3334-4c8e-9d83-ae971b77db99", 0,"Aberto");
+
+            // WHEN
+            String status = order.getStatus();
+
+            //THEN
+            assertThat(status).isEqualTo(StatusOrder.OPEN.getValue());
+        }
+
+        @Test
         public void deveLancarExcecaoDePedidoSemItens() {
             // GIVEN
             List<Item> items = new ArrayList<>();
