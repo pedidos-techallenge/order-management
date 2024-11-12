@@ -6,10 +6,7 @@ import br.com.fiap.techchallange.ordermanagement.core.entity.exceptions.OrderWit
 import br.com.fiap.techchallange.ordermanagement.core.entity.vo.Item;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Order implements Serializable {
 
@@ -20,7 +17,15 @@ public class Order implements Serializable {
     float amount;
     Map<String, Integer> sequenceStatus;
 
-    public Order(){}
+    public Order(){
+        this.id = UUID.randomUUID().toString();
+        this.numberOrder = 0;
+        this.items = new ArrayList<Item>();
+        this.status = StatusOrder.OPEN.getValue();
+        this.amount  = 0;
+        this.sequenceStatus = new HashMap<>();
+        loadSequenceStatus();
+    }
 
     public Order(String id){
         this.id = id;
@@ -138,23 +143,5 @@ public class Order implements Serializable {
 
         return copyItems;
     }
-
-    private Item copyItem(Item original) {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
-            oos.writeObject(original);
-            oos.flush();
-            oos.close();
-            bos.close();
-
-            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-            ObjectInputStream ois = new ObjectInputStream(bis);
-            return (Item) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            throw new IllegalStateException("Not found class payment for orderId "  + this.id);
-        }
-    }
-
 
 }

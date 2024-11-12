@@ -29,7 +29,15 @@ public class OrderListing implements IOrderListingUseCase {
 
     @Override
     public OutputDataOrderDTO invoke(String idOrder) {
+        if (idOrder == null) {
+            throw new IllegalArgumentException("Order ID cannot be null");
+        }
+        
         Order order = this.orderRepository.get(idOrder);
+        if (order == null) {
+            throw new NullPointerException("Order not found");
+        }
+        
         return new OutputDataOrderDTO(order.getId(), order.getNumberOrder(), order.getStatus());
     }
 }

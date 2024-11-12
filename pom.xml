@@ -17,6 +17,15 @@
 		<java.version>17</java.version>
 		<junit.version>5.8.1</junit.version>
 		<junit.jupiter.version>5.10.0</junit.jupiter.version>
+		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.projectKey>${env.SONAR_PROJECT_KEY}</sonar.projectKey>
+		<sonar.login>${env.SONAR_TOKEN}</sonar.login>
+		<sonar.coverage.jacoco.xmlReportPaths>
+			${project.build.directory}/site/jacoco/jacoco.xml
+		</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -82,8 +91,8 @@
 		</dependency>
 		<!-- MySQL Driver -->
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
 			<version>8.0.33</version>
 		</dependency>
 
@@ -123,7 +132,7 @@
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
-			<version>RELEASE</version>
+			<version>24.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -253,6 +262,130 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.10</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.90</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+							<excludes>
+								<!-- Configurações gerais -->
+								<exclude>**/config/**/*</exclude>
+								<exclude>**/configuration/**/*</exclude>
+								
+								<!-- Controllers Config -->
+								<exclude>**/infrastructure/config/controller/checkout/**/*</exclude>
+								<exclude>**/infrastructure/config/controller/paymentorder/**/*</exclude>
+								<exclude>**/infrastructure/config/controller/finalizationservice/**/*</exclude>
+								<exclude>**/infrastructure/config/controller/tracking/**/*</exclude>
+								<exclude>**/infrastructure/config/controller/orderpreparation/**/*</exclude>
+								
+								<!-- UseCase Config -->
+								<exclude>**/infrastructure/config/usecase/finalizationservice/**/*</exclude>
+								<exclude>**/infrastructure/config/usecase/orderpreparation/**/*</exclude>
+								<exclude>**/infrastructure/config/usecase/tracking/**/*</exclude>
+								<exclude>**/infrastructure/config/usecase/checkout/**/*</exclude>
+								<exclude>**/infrastructure/config/usecase/PaymentProcessing/**/*</exclude>
+								
+								
+								<!-- Presenters Config -->
+								<exclude>**/infrastructure/config/presenters/checkout/**/*</exclude>
+								<exclude>**/infrastructure/config/presenters/tracking/**/*</exclude>
+								
+								<!-- Gateways -->
+								<exclude>**/infrastructure/config/gateways/services/**/*</exclude>
+								
+								<!-- Adapters -->
+								<exclude>**/adapters/controllers/tracking/**/*</exclude>
+								<exclude>**/adapters/controllers/checkout/**/*</exclude>
+								<exclude>**/adapters/presenters/checkout/**/*</exclude>
+								
+								<!-- Pacotes específicos completos -->
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/controller/checkout/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/controller/paymentorder/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/controller/finalizationservice/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/usecase/finalizationservice/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/presenters/checkout/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/usecase/orderpreparation/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/usecase/tracking/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/usecase/checkout/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/usecase/PaymentProcessing/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/adapters/controllers/tracking/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/adapters/controllers/checkout/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/adapters/presenters/checkout/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/*</exclude>
+								
+								<!-- Outros padrões existentes -->
+								<exclude>**/dto/**/*</exclude>
+								<exclude>**/entity/**/*</exclude>
+								<exclude>**/domain/model/**/*</exclude>
+								<exclude>**/OrdermanagementApplication.*</exclude>
+								<exclude>**/exception/**/*</exclude>
+								
+								<!-- Infrastructure -->
+								<exclude>**/infrastructure/repository/**/*</exclude>
+								<exclude>**/infrastructure/config/gateways/repository/**/*</exclude>
+								<exclude>**/infrastructure/queue/**/*</exclude>
+								<exclude>**/infrastructure/service/mock/**/*</exclude>
+								<exclude>**/infrastructure/config/queue/**/*</exclude>
+								<exclude>**/infrastructure/config/**/*</exclude>
+
+								<!-- Adapters -->
+								<exclude>**/adapters/presenters/tracking/**/*</exclude>
+								<exclude>**/adapters/controllers/orderpreparation/**/*</exclude>
+								
+								<!-- Pacotes específicos completos -->
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/repository/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/gateways/repository/*</exclude>								
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/queue/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/service/*</exclude>								
+								<exclude>br/com/fiap/techchallange/ordermanagement/adapters/presenters/tracking/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/queue/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/service/mock/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/infrastructure/config/*</exclude>
+								<exclude>br/com/fiap/techchallange/ordermanagement/adapters/controllers/orderpreparation/*</exclude>
+								
+								<!-- Outros padrões existentes -->
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Plugin do SonarCloud -->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.9.1.2184</version>
 			</plugin>
 		</plugins>
 
