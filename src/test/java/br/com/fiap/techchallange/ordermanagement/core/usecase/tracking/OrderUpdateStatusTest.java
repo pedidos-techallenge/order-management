@@ -144,4 +144,43 @@ class OrderUpdateStatusTest {
             "Event don't mapped"
         );
     }
+
+    @Test
+    void shouldUpdateOrderStatusUsingOrderNumberWhenIdOrderIsNull() {
+        // Arrange
+        Integer orderNumber = 123;
+        Order order = mock(Order.class);
+        when(order.getId()).thenReturn("fd0b97c0-3334-4c8e-9d83-ae971b77db99");
+        when(order.getNumberOrder()).thenReturn(orderNumber);
+        when(order.getStatus()).thenReturn(StatusOrder.INPREPARATION.getValue());
+        when(orderRepository.getByOrderNumber(orderNumber)).thenReturn(order);
+        
+        EventOrder event = new EventOrder(orderNumber, "preparationFood");
+
+        // Act
+        orderUpdateStatus.onEvent(event);
+
+        // Assert
+        verify(orderRepository).getByOrderNumber(orderNumber);
+        verify(order).updateStatus(StatusOrder.INPREPARATION);
+        verify(orderRepository).update(order);
+        verify(displayInformationOrderPresenter).display(any(OutputDataOrderDTO.class));
+    }
+
+    @Test
+    void shouldNotUpdateWhenOrderNotFoundByOrderNumber() {
+        // Arrange
+        Integer orderNumber = 123;
+        when(orderRepository.getByOrderNumber(orderNumber)).thenReturn(null);
+        
+        EventOrder event = new EventOrder(orderNumber, "preparationFood");
+
+        // Act
+        orderUpdateStatus.onEvent(event);
+
+        // Assert
+        verify(orderRepository).getByOrderNumber(orderNumber);
+        verify(orderRepository, never()).update(any());
+        verify(displayInformationOrderPresenter, never()).display(any());
+    }
 } 

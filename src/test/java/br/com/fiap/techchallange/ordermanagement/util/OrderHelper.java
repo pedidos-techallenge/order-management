@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 public class OrderHelper {
@@ -40,8 +39,6 @@ public class OrderHelper {
 
     public static Order generateOrder(int numberOrder, StatusOrder status){
         String idOrder  = "fd0b97c0-3334-4c8e-9d83-ae971b77db99";
-        Random random = new Random();
-
 
         Item item1 = new Item("123456A", 2, 35);
         Item item2 = new Item("123456B", 1, 15);
