@@ -55,7 +55,7 @@ jobs:
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.qualitygate.wait=true \
             -Dsonar.scm.provider=git \
-            -Dsonar.autoAnalysis.enabled=false
+            -Dsonar.branch.name=${GITHUB_REF##*/}
 
   mongodb-atlas:
     needs: test
