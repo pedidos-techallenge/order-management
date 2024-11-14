@@ -60,7 +60,12 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.scm.provider=git
-            -Dsonar.pullrequest.github.summary_comment=true
+            -Dsonar.analysis.mode=publish
+            -Dsonar.scanner.force-deprecated-java-version=true
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.alm.enabled=false
+            -Dsonar.validateWebhooks=false
+            -Dsonar.notifications.enabled=false
 
   mongodb-atlas:
     needs: test
