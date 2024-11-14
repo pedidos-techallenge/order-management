@@ -40,7 +40,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Run Tests and Coverage
-        run: mvn clean verify -Pcoverage
+        run: mvn clean verify -P test
 
       - name: SonarCloud Scan
         if: github.actor != 'nektos/act' # Pula o Sonar quando rodando com act
