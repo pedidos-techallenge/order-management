@@ -40,32 +40,18 @@ jobs:
           distribution: 'temurin'
 
       - name: Run Tests and Coverage
-        run: mvn clean verify -P test
+        run: mvn clean verify -Pcoverage
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+      - name: SonarCloud Analysis
+        if: github.event_name == 'workflow_dispatch'  # Só executa manualmente
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.sources=src/main/java
-            -Dsonar.tests=src/test/java
-            -Dsonar.java.binaries=target/classes
-            -Dsonar.java.test.binaries=target/test-classes
-            -Dsonar.java.libraries=target/dependency/*.jar
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-            -Dsonar.verbose=true
-            -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.scm.provider=git
-            -Dsonar.analysis.mode=publish
-            -Dsonar.scanner.force-deprecated-java-version=true
-            -Dsonar.qualitygate.wait=true
-            -Dsonar.alm.enabled=false
-            -Dsonar.validateWebhooks=false
-            -Dsonar.notifications.enabled=false
+        run: |
+          mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=pedidos-techallenge_order-management \
+            -Dsonar.organization=pedidos-techallenge \
+            -Dsonar.host.url=https://sonarcloud.io
 
   mongodb-atlas:
     needs: test
