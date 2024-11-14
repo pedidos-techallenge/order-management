@@ -40,7 +40,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Run Tests and Coverage
-        run: mvn clean verify -Pcoverage
+        run: mvn clean verify -P test
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
