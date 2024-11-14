@@ -467,6 +467,17 @@
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>0.8.10</version>
+						<configuration>
+							<includes>
+								<include>**/core/entity/*Test.java</include>
+								<include>**/core/usecase/*Test.java</include>
+								<include>**/core/usecase/**/*Test.java</include>
+							</includes>
+							<excludes>
+								<exclude>**/*IT.java</exclude>
+								<exclude>**/bdd/**/*</exclude>
+							</excludes>
+						</configuration>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
