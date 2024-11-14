@@ -17,7 +17,7 @@
 		<java.version>17</java.version>
 		<junit.version>5.8.1</junit.version>
 		<junit.jupiter.version>5.10.0</junit.jupiter.version>
-		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
+		<sonar.organization>pedidos-techallenge</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.projectKey>${env.SONAR_PROJECT_KEY}</sonar.projectKey>
 		<sonar.login>${env.SONAR_TOKEN}</sonar.login>
@@ -452,6 +452,45 @@
 										<exclude>**/Application.*</exclude>
 									</excludes>
 								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>coverage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.10</version>
+						<configuration>
+							<includes>
+								<include>**/core/entity/*Test.java</include>
+								<include>**/core/usecase/*Test.java</include>
+								<include>**/core/usecase/**/*Test.java</include>
+							</includes>
+							<excludes>
+								<exclude>**/*IT.java</exclude>
+								<exclude>**/bdd/**/*</exclude>
+							</excludes>
+						</configuration>
+						<executions>
+							<execution>
+								<id>prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
 							</execution>
 						</executions>
 					</plugin>

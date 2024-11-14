@@ -39,20 +39,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Run unit tests with coverage
-        run: mvn clean test jacoco:report -P test
+      - name: Run Tests and Coverage
+        run: mvn clean verify -Pcoverage
 
-      - name: SonarCloud Scan
-        if: github.actor != 'nektos/act' # Pula o Sonar quando rodando com act
+      - name: SonarCloud Analysis
+        if: github.event_name == 'workflow_dispatch'  # Só executa manualmente
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn sonar:sonar -DskipTests \
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+            -Dsonar.projectKey=pedidos-techallenge_order-management \
+            -Dsonar.organization=pedidos-techallenge \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
   mongodb-atlas:
     needs: test
