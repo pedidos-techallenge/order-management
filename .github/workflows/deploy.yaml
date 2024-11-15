@@ -175,9 +175,8 @@ jobs:
 
       - name: Create Secret manifest
         env:
-          MONGODB_URI: ${{ needs.mongodb-atlas.outputs.mongodb_connection_string }}
+          MONGODB_URI: ${{ needs.mongodb-atlas.outputs.mongodb_uri }}
         run: |
-          # Criar secret usando diretamente a string do job anterior
           kubectl create secret generic order-management-secrets \
             --from-literal=MONGODB_URI="${MONGODB_URI}" \
             --from-literal=AWS_ACCESS_KEY_ID="${{ env.AWS_ACCESS_KEY_ID }}" \
