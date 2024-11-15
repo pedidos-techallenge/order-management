@@ -88,6 +88,13 @@ jobs:
             -Dsonar.branch.name=main \
             -Dsonar.scm.provider=git
 
+      # Garantir que o JAR foi gerado
+      - name: List target directory
+        run: ls -la target/
+
+      - name: Build Docker Image
+        run: docker build -t order-management .
+
   mongodb-atlas:
     needs: CI
     if: github.event_name == 'push' || github.event.inputs.job_name == 'mongodb-atlas' || github.event.inputs.job_name == 'all'
