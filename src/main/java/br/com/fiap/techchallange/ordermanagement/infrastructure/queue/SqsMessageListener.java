@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Service
 public class SqsMessageListener implements IMessageListener {
@@ -29,7 +30,7 @@ public class SqsMessageListener implements IMessageListener {
         PaymentOrderDTO paymentOrderDTO = objectMapper.readValue(message, PaymentOrderDTO.class);
         StatusPayment statusPayment = StatusPayment.fromValue(paymentOrderDTO.statusPayment());
 
-        EventPayment eventPayment = new EventPayment(paymentOrderDTO.idOrder(), statusPayment);
+        EventPayment eventPayment = new EventPayment(paymentOrderDTO.idOrder(), statusPayment, LocalDateTime.now());
         paymentProcessingUseCase.invoke(eventPayment);
     }
 }
