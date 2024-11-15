@@ -42,9 +42,6 @@ spec:
             secretKeyRef:
               name: order-management-secrets
               key: AWS_SESSION_TOKEN
-        envFrom:
-        - secretRef:
-            name: order-management-secrets
         ports:
         - containerPort: 8080
         resources:
@@ -54,3 +51,9 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "1000m"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10

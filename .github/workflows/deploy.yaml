@@ -95,7 +95,7 @@ jobs:
     env:
       TF_IN_AUTOMATION: "true"
     outputs:
-      mongodb_connection_string: ${{ steps.get_mongodb_uri.outputs.mongodb_uri }}
+      mongodb_uri: ${{ steps.get_mongodb_uri.outputs.mongodb_uri }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
