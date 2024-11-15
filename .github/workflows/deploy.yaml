@@ -57,12 +57,22 @@ jobs:
           apt-get install -y maven
 
       - name: Run Tests and Coverage
-        run: |
-          mvn clean verify -Pcoverage
-          echo "Verificando relatório JaCoCo:"
-          ls -la target/site/jacoco/
-          echo "Conteúdo do relatório XML:"
-          cat target/site/jacoco/jacoco.xml
+        run: mvn clean verify -Pcoverage
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v2
+        with:
+          name: application
+          path: target/*.jar
+
+      - name: Download JAR
+        uses: actions/download-artifact@v2
+        with:
+          name: application
+          path: target/
+
+      - name: Build Docker Image
+        run: docker build --no-cache . -t order-management
 
       - name: SonarCloud Analysis
         env:
@@ -91,15 +101,6 @@ jobs:
       # Garantir que o JAR foi gerado
       - name: List target directory
         run: ls -la target/
-
-      - name: Build Docker Image
-        run: |
-          if [ ! -f target/*.jar ]; then
-            echo "JAR não encontrado, gerando..."
-            mvn package -DskipTests
-          fi
-          ls -la target/
-          docker build --no-cache . -t order-management
 
   mongodb-atlas:
     needs: CI
