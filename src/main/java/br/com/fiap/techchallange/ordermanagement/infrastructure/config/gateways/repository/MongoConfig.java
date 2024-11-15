@@ -1,18 +1,14 @@
 package br.com.fiap.techchallange.ordermanagement.infrastructure.config.gateways.repository;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoClient;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.annotation.PostConstruct;
-import javax.net.ssl.SSLContext;
-import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class MongoConfig {
@@ -23,44 +19,25 @@ public class MongoConfig {
     @Value("${spring.data.mongodb.database}")
     private String database;
 
-    private MongoClientSettings createMongoSettings() {
-        ConnectionString connectionString = new ConnectionString(mongoUri);
-        
-        return MongoClientSettings.builder()
-            .applyConnectionString(connectionString)
-            .applyToSslSettings(builder -> {
-                builder.enabled(true);
-                builder.invalidHostNameAllowed(true);
-                try {
-                    builder.context(SSLContext.getDefault());
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException("Erro ao configurar SSL", e);
-                }
-            })
+    @Bean
+    public MongoClient mongoClient() {
+        MongoClientSettings settings = MongoClientSettings.builder()
+            .applyConnectionString(new ConnectionString(mongoUri))
+            .applyToSocketSettings(builder -> 
+                builder.connectTimeout(30000, TimeUnit.MILLISECONDS)
+                      .readTimeout(30000, TimeUnit.MILLISECONDS)
+            )
+            .applyToClusterSettings(builder -> 
+                builder.serverSelectionTimeout(30000, TimeUnit.MILLISECONDS)
+            )
             .build();
+
+        return MongoClients.create(settings);
     }
 
     @Bean
-    @Profile("dev")
-    public MongoClient mongoClientLocal() {
-        return MongoClients.create(mongoUri);
-    }
-
-    @Bean
-    @Profile("prd")
-    public MongoClient mongoClientProd() {
-        return MongoClients.create(createMongoSettings());
-    }
-
-    @Bean
-    public MongoTemplate mongoTemplate(@Autowired MongoClient mongoClient) {
+    public MongoTemplate mongoTemplate(MongoClient mongoClient) {
         return new MongoTemplate(mongoClient, database);
-    }
-
-    @PostConstruct
-    public void logMongoUri() {
-        String sanitizedUri = mongoUri.replaceAll(":[^:@]+@", ":****@");
-        System.out.println("MongoDB URI: " + sanitizedUri);
     }
 }
 
