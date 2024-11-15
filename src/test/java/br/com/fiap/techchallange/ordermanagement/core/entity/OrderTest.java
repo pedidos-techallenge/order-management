@@ -110,6 +110,33 @@ public class OrderTest {
             // THEN
             assertThat(thrown.getMessage()).isEqualTo("Pedido sem items adicionados!");
         }
+
+        @Test
+        public void naoDeveSetarNumeroOrderQuandoStatusDiferenteDeOpen() {
+            // GIVEN
+            Order order = new Order();
+            order.setNumberOrder(1); // primeiro set com status OPEN
+            order.updateStatus(StatusOrder.RECEIVED); // muda status para RECEIVED
+            
+            // WHEN
+            order.setNumberOrder(2); // tenta mudar o número com status diferente de OPEN
+            
+            // THEN
+            assertThat(order.getNumberOrder()).isEqualTo(1); // número deve permanecer o mesmo
+        }
+
+        @Test
+        public void naoDeveSetarNumeroOrderQuandoJaPossuiNumero() {
+            // GIVEN
+            Order order = new Order();
+            order.setNumberOrder(1); // primeiro set com numberOrder = 0
+            
+            // WHEN
+            order.setNumberOrder(2); // tenta mudar o número quando já possui um
+            
+            // THEN
+            assertThat(order.getNumberOrder()).isEqualTo(1); // número deve permanecer o mesmo
+        }
     }
 
     @Nested

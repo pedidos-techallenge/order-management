@@ -33,6 +33,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,7 +106,7 @@ public class OrderUseCaseTest {
             when(generateNumberOrder.generate()).thenReturn(1);
 
             // WHEN
-            EventPayment eventPayment = new EventPayment("fd0b97c0-3334-4c8e-9d83-ae971b77db99", StatusPayment.PAID);
+            EventPayment eventPayment = new EventPayment("fd0b97c0-3334-4c8e-9d83-ae971b77db99", StatusPayment.PAID, LocalDateTime.now());
             paymentOrder.invoke(eventPayment);
 
             ArgumentCaptor<EventOrder> eventCaptor = ArgumentCaptor.forClass(EventOrder.class);
@@ -127,7 +128,7 @@ public class OrderUseCaseTest {
             when(generateNumberOrder.generate()).thenReturn(1);
 
             // WHEN
-            EventPayment eventPayment = new EventPayment("fd0b97c0-3334-4c8e-9d83-ae971b77db99", StatusPayment.DENIED);
+            EventPayment eventPayment = new EventPayment("fd0b97c0-3334-4c8e-9d83-ae971b77db99", StatusPayment.DENIED, LocalDateTime.now());
             paymentOrder.invoke(eventPayment);
 
             ArgumentCaptor<EventOrder> eventCaptor = ArgumentCaptor.forClass(EventOrder.class);

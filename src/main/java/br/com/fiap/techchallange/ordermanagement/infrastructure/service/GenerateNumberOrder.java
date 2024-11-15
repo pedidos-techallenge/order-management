@@ -13,6 +13,11 @@ public class GenerateNumberOrder implements IGenerateNumberOrder {
 
     @Override
     public Integer generate() {
-        return getLatestOrderNumberController.getLastNumber() + 1;
+        int lastNumber = getLatestOrderNumberController.getLastNumber();
+        try {
+            return Math.addExact(lastNumber, 1);
+        } catch (ArithmeticException e) {
+            throw new ArithmeticException("Número máximo de pedidos atingido");
+        }
     }
 }
