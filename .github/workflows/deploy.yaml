@@ -24,7 +24,7 @@ env:
   TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
   AWS_DEFAULT_REGION: us-east-1
   EKS_CLUSTER_NAME: techchallenge-eks-cluster
-  ECR_REPOSITORY: techchallenge-ect
+  ECR_REPOSITORY: techchallenge-ecr
   MONGODB_URI: ${{ secrets.MONGODB_URI }}
   MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
   MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
