@@ -2838,3 +2838,7 @@ sonar-project.yaml
 /.scannerwork/ucfg2/java/ucfg_292.proto
 /.scannerwork/.sonar_lock
 /sonar-project.properties
+src/main/resources/application-local-private.yml
+scripts/local-deploy.sh
+infrastructure/kubernetes/local/mongodb-secret.yaml
+local-deploy.sh

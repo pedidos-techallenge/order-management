@@ -12,20 +12,30 @@ spec:
       labels:
         app: order-management
     spec:
+      hostAliases:
+      - ip: "52.87.82.147"
+        hostnames:
+        - "tech-challenge-cluster.bwktl.mongodb.net"
+      dnsConfig:
+        options:
+          - name: timeout
+            value: "30"
+          - name: attempts
+            value: "5"
       containers:
       - name: order-management
-        image: ${ECR_REGISTRY}:${IMAGE_TAG}
-        imagePullPolicy: Always
+        image: order-management:local
+        imagePullPolicy: Never
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "prd"
+          value: "local-private"
         - name: MONGODB_URI
           valueFrom:
             secretKeyRef:
               name: order-management-secrets
               key: MONGODB_URI
         - name: AWS_REGION
-          value: "us-east-1"
+          value: "us-west-2"
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
@@ -43,10 +53,3 @@ spec:
               key: AWS_SESSION_TOKEN
         ports:
         - containerPort: 8080
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
