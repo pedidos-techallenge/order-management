@@ -94,9 +94,12 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          ls -la
-          pwd
-          docker build -t order-management -f Dockerfile .
+          if [ ! -f target/*.jar ]; then
+            echo "JAR não encontrado, gerando..."
+            mvn package -DskipTests
+          fi
+          ls -la target/
+          docker build --no-cache . -t order-management
 
   mongodb-atlas:
     needs: CI
