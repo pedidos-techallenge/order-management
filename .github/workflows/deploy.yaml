@@ -65,13 +65,19 @@ jobs:
           name: application
           path: target/*.jar
 
-      - name: Download JAR
+      - name: Prepare Docker Build Context
+        # Baixa o JAR e coloca no diretório esperado para o Docker
         uses: actions/download-artifact@v4
         with:
           name: application
-          path: target/
+          run: mv application/*.jar target/app.jar
+
+      - name: Verify JAR for Docker Build
+        # Verifica se o JAR foi corretamente preparado
+        run: ls -la target/
 
       - name: Build Docker Image
+        # Constrói a imagem Docker usando o arquivo app.jar no local correto
         run: docker build --no-cache . -t order-management
 
       - name: SonarCloud Analysis
@@ -97,10 +103,6 @@ jobs:
             -Dsonar.verbose=true \
             -Dsonar.branch.name=main \
             -Dsonar.scm.provider=git
-
-      # Garantir que o JAR foi gerado
-      - name: List target directory
-        run: ls -la target/
 
   mongodb-atlas:
     needs: CI
