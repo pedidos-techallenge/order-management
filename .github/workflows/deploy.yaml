@@ -150,13 +150,11 @@ jobs:
         id: get_mongodb_uri
         working-directory: ./infrastructure/terraform
         run: |
-          # Obter componentes da conexão
-          MONGO_HOST=$(terraform output -raw mongodb_connection_string)
-          MONGO_USER=$(terraform output -raw mongodb_username)
-          MONGO_PASS=$(terraform output -raw mongodb_password)
+          # Obter a string de conexão completa do Terraform
+          CONN_STRING=$(terraform output -raw mongodb_connection_string)
           
-          # Construir a string de conexão completa
-          CONN_STRING="mongodb+srv://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}/order-management?retryWrites=true&w=majority"
+          # Adicionar o banco de dados e parâmetros
+          CONN_STRING="${CONN_STRING}/order-management?ssl=true&authSource=admin"
           
           # Debug (mascarando senha)
           echo "Connection string format: $(echo ${CONN_STRING} | sed 's/:[^@]*@/@/g')"
