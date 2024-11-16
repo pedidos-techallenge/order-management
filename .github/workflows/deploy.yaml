@@ -150,25 +150,16 @@ jobs:
         id: get_mongodb_uri
         working-directory: ./infrastructure/terraform
         run: |
-          # Obter a string de conexão SRV
-          CONN_STRING=$(terraform output -raw mongodb_connection_string)
+          # Obter componentes da conexão
+          MONGO_HOST=$(terraform output -raw mongodb_connection_string)
+          MONGO_USER=$(terraform output -raw mongodb_username)
+          MONGO_PASS=$(terraform output -raw mongodb_password)
           
-          # Debug da string original
-          echo "Original connection string: ${CONN_STRING}"
+          # Construir a string de conexão completa
+          CONN_STRING="mongodb+srv://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}/order-management?retryWrites=true&w=majority"
           
-          # Garantir que a string comece com mongodb:// ou mongodb+srv://
-          if [[ ! $CONN_STRING =~ ^mongodb(\+srv)?:// ]]; then
-            CONN_STRING="mongodb+srv://${CONN_STRING}"
-          fi
-          
-          # Debug da string final (mascarando senhas)
-          echo "Final connection string format: $(echo ${CONN_STRING} | sed 's/:[^@]*@/@/g')"
-          
-          # Verificar se a string contém todas as partes necessárias
-          if [[ ! $CONN_STRING =~ .*@.*/.* ]]; then
-            echo "Error: Connection string parece estar incompleta"
-            exit 1
-          fi
+          # Debug (mascarando senha)
+          echo "Connection string format: $(echo ${CONN_STRING} | sed 's/:[^@]*@/@/g')"
           
           # Exportar a URI formatada
           echo "mongodb_uri=${CONN_STRING}" >> $GITHUB_OUTPUT
