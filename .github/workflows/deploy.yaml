@@ -154,7 +154,7 @@ jobs:
           CONN_STRING=$(terraform output -raw mongodb_connection_string)
           
           # Debug (mascarando senha)
-          echo "Connection string format: $(echo ${CONN_STRING} | sed 's/:[^@]*@/@/g')"
+          echo "Connection string format: $(echo ${CONN_STRING} | sed -E 's/:[^@]+/@/')"
           
           # Exportar a URI formatada
           echo "mongodb_uri=${CONN_STRING}" >> $GITHUB_OUTPUT
