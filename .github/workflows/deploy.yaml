@@ -156,8 +156,8 @@ jobs:
           # Obter o host do MongoDB (removendo o prefixo mongodb+srv://)
           MONGO_HOST=$(terraform output -raw mongodb_connection_string | sed 's|mongodb+srv://||')
           
-          # Construir a string de conexão completa
-          CONN_STRING="mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGO_HOST}/order-management?retryWrites=true&w=majority"
+          # Construir a string de conexão completa no formato correto
+          CONN_STRING="mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGO_HOST}/?ssl=true&authSource=admin"
           
           # Debug (mascarando senha)
           echo "Connection string format: $(echo ${CONN_STRING} | sed 's/:[^@]*@/@/g')"
