@@ -153,7 +153,15 @@ jobs:
           # Obter a string de conexão SRV
           CONN_STRING=$(terraform output -raw mongodb_connection_string)
           
-          # Apenas passar a string base, sem modificações
+          # Garantir que a string comece com mongodb:// ou mongodb+srv://
+          if [[ ! $CONN_STRING =~ ^mongodb(\+srv)?:// ]]; then
+            CONN_STRING="mongodb+srv://${CONN_STRING}"
+          fi
+          
+          # Debug (remova em produção)
+          echo "Connection string format: ${CONN_STRING:0:20}..." # mostra só o início por segurança
+          
+          # Exportar a URI formatada
           echo "mongodb_uri=${CONN_STRING}" >> $GITHUB_OUTPUT
 
   deploy-application:
