@@ -13,7 +13,7 @@ output "docdb_credentials" {
 
 output "mongodb_connection_string" {
   description = "MongoDB Atlas Connection String"
-  value       = format("mongodb+srv://%s:%s@%s",
+  value       = format("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority",
     var.mongodb_username,
     var.mongodb_password,
     trimprefix(mongodbatlas_cluster.techchallenge.connection_strings[0].standard_srv, "mongodb+srv://")
