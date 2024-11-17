@@ -148,19 +148,12 @@ jobs:
 
       - name: Wait for MongoDB Cluster and Get URI
         id: get_mongodb_uri
-        working-directory: ./infrastructure/terraform
-        env:
-          MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
-          MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
         run: |
-          # Obter o host do MongoDB
-          MONGO_HOST=$(terraform output -raw mongodb_connection_string)
-          
-          # Construir a string de conexão completa
-          CONN_STRING="mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@$(echo ${MONGO_HOST} | sed 's|mongodb+srv://||')/order-management?retryWrites=true&w=majority"
+          # Usar a string de conexão diretamente das secrets
+          CONN_STRING="${{ secrets.MONGODB_URI }}"
           
           # Debug (mascarando senha)
-          echo "Connection string format: $(echo ${CONN_STRING} | sed 's/\/\/[^:]*:[^@]*@/\/\/turmafiap:*****@/')"
+          echo "Connection string format: $(echo ${CONN_STRING} | sed 's/:[^@]*@/:*****@/')"
           
           # Exportar a URI formatada
           echo "mongodb_uri=${CONN_STRING}" >> $GITHUB_OUTPUT
