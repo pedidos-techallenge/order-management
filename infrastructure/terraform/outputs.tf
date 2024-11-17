@@ -1,15 +1,15 @@
 # Outputs
-output "docdb_endpoint" {
-  value = aws_docdb_cluster.docdb.endpoint
-}
+# output "docdb_endpoint" {
+#   value = aws_docdb_cluster.docdb.endpoint
+# }
 
-output "docdb_credentials" {
-  value = {
-    username = aws_docdb_cluster.docdb.master_username
-    database = "dbtechchallenge"
-  }
-  sensitive = true
-}
+# output "docdb_credentials" {
+#   value = {
+#     username = aws_docdb_cluster.docdb.master_username
+#     database = "dbtechchallenge"
+#   }
+#   sensitive = true
+# }
 
 output "mongodb_connection_string" {
   description = "MongoDB Atlas Connection String"
