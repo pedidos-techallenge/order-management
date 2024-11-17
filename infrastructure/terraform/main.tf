@@ -18,57 +18,62 @@ data "aws_subnets" "private_subnets" {
 }
 
 # Security Group para o DocumentDB
-resource "aws_security_group" "docdb" {
-  name        = "docdb-security-group"
-  description = "Security group for DocumentDB cluster"
-  vpc_id      = data.aws_vpc.techchallenge-vpc.id
+# resource "aws_security_group" "docdb" {
+#   name        = "docdb-security-group"  # Nome do grupo de segurança
+#   description = "Security group for DocumentDB cluster"  # Descrição do grupo de segurança
+#   vpc_id      = data.aws_vpc.techchallenge-vpc.id  # ID da VPC onde o grupo de segurança será criado
 
-  ingress {
-    from_port   = 27017
-    to_port     = 27017
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   # Regras de entrada (ingress) para permitir tráfego na porta 27017 (padrão do MongoDB)
+#   ingress {
+#     from_port   = 27017  # Porta de origem
+#     to_port     = 27017  # Porta de destino
+#     protocol    = "tcp"  # Protocolo TCP
+#     cidr_blocks = ["0.0.0.0/0"]  # Permitir acesso de qualquer IP (não recomendado para produção)
+#   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   # Regras de saída (egress) para permitir todo o tráfego de saída
+#   egress {
+#     from_port   = 0  # Porta de origem
+#     to_port     = 0  # Porta de destino
+#     protocol    = "-1"  # Todos os protocolos
+#     cidr_blocks = ["0.0.0.0/0"]  # Permitir acesso a qualquer IP
+#   }
 
-  tags = {
-    Name = "docdb-security-group"
-  }
-}
+#   # Tags para identificação do grupo de segurança
+#   tags = {
+#     Name = "docdb-security-group"  # Nome da tag
+#   }
+# }
 
 # Subnet Group para o DocumentDB
-resource "aws_docdb_subnet_group" "docdb" {
-  name       = "docdb-subnet-group"
-  subnet_ids = data.aws_subnets.private_subnets.ids
+# resource "aws_docdb_subnet_group" "docdb" {
+#   name       = "docdb-subnet-group"  # Nome do grupo de sub-rede
+#   subnet_ids = data.aws_subnets.private_subnets.ids  # IDs das sub-redes privadas onde o DocumentDB será implantado
 
-  tags = {
-    Name = "docdb-subnet-group"
-  }
-}
+#   # Tags para identificação do grupo de sub-rede
+#   tags = {
+#     Name = "docdb-subnet-group"  # Nome da tag
+#   }
+# }
 
 # Cluster DocumentDB
-resource "aws_docdb_cluster" "docdb" {
-  cluster_identifier      = "tech-challenge-docdb"
-  engine                  = "docdb"
-  engine_version         = "5.0.0"
-  master_username         = var.mongodb_username
-  master_password         = var.mongodb_password
-  db_subnet_group_name    = aws_docdb_subnet_group.docdb.name
-  vpc_security_group_ids  = [aws_security_group.docdb.id]
-  skip_final_snapshot     = true
-  deletion_protection     = false
-  apply_immediately       = true
+# resource "aws_docdb_cluster" "docdb" {
+#   cluster_identifier      = "tech-challenge-docdb"  # Identificador do cluster
+#   engine                  = "docdb"  # Tipo de banco de dados (DocumentDB)
+#   engine_version          = "5.0.0"  # Versão do engine do DocumentDB
+#   master_username         = var.mongodb_username  # Nome de usuário do master (definido em variáveis)
+#   master_password         = var.mongodb_password  # Senha do master (definido em variáveis)
+#   db_subnet_group_name    = aws_docdb_subnet_group.docdb.name  # Nome do grupo de sub-rede associado ao cluster
+#   vpc_security_group_ids  = [aws_security_group.docdb.id]  # IDs dos grupos de segurança associados ao cluster
+#   skip_final_snapshot     = true  # Ignorar a criação de um snapshot final ao excluir o cluster
+#   deletion_protection     = false  # Permitir a exclusão do cluster
+#   apply_immediately       = true  # Aplicar as alterações imediatamente
 
-  tags = {
-    Name = "tech-challenge-docdb"
-  }
-}
+#   # Tags para identificação do cluster
+#   tags = {
+#     Name = "tech-challenge-docdb"  # Nome da tag
+#   }
+# }
 
 # Data source para obter o NAT Gateway do EKS
 data "aws_nat_gateway" "eks_nat" {
