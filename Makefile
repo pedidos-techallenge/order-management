@@ -9,3 +9,6 @@ integration-test:
 
 system-test:
 	mvn test -P system-test
+
+docker-build:
+	docker build -t order-management .
