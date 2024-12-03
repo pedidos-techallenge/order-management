@@ -291,6 +291,51 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+										<limit>
+											<counter>BRANCH</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+										<limit>
+											<counter>METHOD</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.90</minimum>
+										</limit>
+										<limit>
+											<counter>CLASS</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+							<excludes>
+								<exclude>**/config/**/*</exclude>
+								<exclude>**/configuration/**/*</exclude>
+								<exclude>**/infrastructure/**/*</exclude>
+								<exclude>**/adapters/**/*</exclude>
+								<exclude>**/dto/**/*</exclude>
+								<exclude>**/Application.*</exclude>
+								<exclude>**/core/usecase/**/*Test.java</exclude>
+							</excludes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
@@ -408,19 +453,16 @@
 													<value>COVEREDRATIO</value>
 													<minimum>0.80</minimum>
 												</limit>
-												<!-- Cobertura de branches (if/else) -->
 												<limit>
 													<counter>BRANCH</counter>
 													<value>COVEREDRATIO</value>
 													<minimum>0.80</minimum>
 												</limit>
-												<!-- Cobertura de métodos -->
 												<limit>
 													<counter>METHOD</counter>
 													<value>COVEREDRATIO</value>
 													<minimum>0.90</minimum>
 												</limit>
-												<!-- Cobertura de classes -->
 												<limit>
 													<counter>CLASS</counter>
 													<value>COVEREDRATIO</value>
@@ -436,6 +478,7 @@
 										<exclude>**/adapters/**/*</exclude>
 										<exclude>**/dto/**/*</exclude>
 										<exclude>**/Application.*</exclude>
+										<exclude>**/core/usecase/**/*Test.java</exclude>
 									</excludes>
 								</configuration>
 							</execution>
