@@ -91,3 +91,9 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir um pull request 
 ## Licença
 
 Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## Cobertura de Testes
+
+Abaixo está a captura de tela do resultado da cobertura de testes do SonarQube:
+
+![Cobertura de Testes](images/CoverageSonarQube.png)  <!-- Ajuste o caminho e o nome do arquivo conforme necessário -->
