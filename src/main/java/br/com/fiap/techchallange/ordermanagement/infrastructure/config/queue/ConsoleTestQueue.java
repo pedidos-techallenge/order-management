@@ -9,7 +9,7 @@ import com.amazonaws.services.sqs.model.SendMessageResult;
 
 public class ConsoleTestQueue {
 
-    private static String getEnvOrDefault(String key, String defaultValue) {
+    static String getEnvOrDefault(String key, String defaultValue) {
         String value = System.getenv(key);
         return value != null ? value : defaultValue;
     }
