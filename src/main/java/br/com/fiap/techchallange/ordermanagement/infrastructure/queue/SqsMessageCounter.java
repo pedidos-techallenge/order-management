@@ -1,5 +1,6 @@
 package br.com.fiap.techchallange.ordermanagement.infrastructure.queue;
 
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesResponse;
@@ -18,6 +19,7 @@ public class SqsMessageCounter {
         if (sqsClient == null) {
             sqsClient = SqsClient.builder()
                     .endpointOverride(URI.create("http://localhost:4566"))
+                    .credentialsProvider(DefaultCredentialsProvider.create())
                     .build();
         }
 

@@ -2,10 +2,8 @@ package br.com.fiap.techchallange.ordermanagement.infrastructure.queue;
 
 import br.com.fiap.techchallange.ordermanagement.core.entity.enums.StatusPayment;
 import br.com.fiap.techchallange.ordermanagement.core.entity.vo.EventPayment;
-import br.com.fiap.techchallange.ordermanagement.core.usecase.dto.payment.PaymentOrderDTO;
 import br.com.fiap.techchallange.ordermanagement.core.usecase.inputboundary.processingpayment.IPaymentProcessingUseCase;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,19 +26,16 @@ public class SqsMessageListenerTest {
     @Mock
     private IPaymentProcessingUseCase paymentProcessingUseCase;
 
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        objectMapper = new ObjectMapper();
+        MockitoAnnotations.openMocks(this);       
     }
 
     @Test
     public void testConsumer() throws IOException {
         // Arrange
-        String message = "{\"idOrder\":\"12345\", \"statusPayment\":\"PAID\"}";
-        PaymentOrderDTO paymentOrderDTO = new PaymentOrderDTO("12345", "PAID");
+        String message = "{\"idOrder\":\"12345\", \"statusPayment\":\"PAID\"}";       
 
         // Act
         sqsMessageListener.consumer(message);
