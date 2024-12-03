@@ -1,7 +1,6 @@
 package br.com.fiap.techchallange.ordermanagement.infrastructure.queue;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesResponse;
@@ -14,7 +13,7 @@ import static org.mockito.Mockito.*;
 public class SqsMessageCounterTest {
 
     @Test
-    public void testMain() {
+    void testMain() {
         // Mock do SqsClient
         SqsClient sqsClient = mock(SqsClient.class);
         

@@ -112,7 +112,7 @@ public class OrderTest {
         }
 
         @Test
-        protected void naoDeveSetarNumeroOrderQuandoStatusDiferenteDeOpen() {
+        void naoDeveSetarNumeroOrderQuandoStatusDiferenteDeOpen() {
             // GIVEN
             Order order = new Order();
             order.setNumberOrder(1); // primeiro set com status OPEN
@@ -126,7 +126,7 @@ public class OrderTest {
         }
 
         @Test
-        protected void naoDeveSetarNumeroOrderQuandoJaPossuiNumero() {
+        void naoDeveSetarNumeroOrderQuandoJaPossuiNumero() {
             // GIVEN
             Order order = new Order();
             order.setNumberOrder(1); // primeiro set com numberOrder = 0
