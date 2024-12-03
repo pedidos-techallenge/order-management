@@ -11,7 +11,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "terraform-state-techchallenge"
+    bucket = "terraform-state-techchallenge-2"
     key    = "mongodb.tfstate"
     region = "us-east-1"
   }

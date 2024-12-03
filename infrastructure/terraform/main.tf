@@ -31,7 +31,7 @@ data "aws_nat_gateway" "eks_nat" {
 
 # Projeto MongoDB Atlas
 resource "mongodbatlas_project" "techchallenge" {
-  name   = "tech-challenge"
+  name   = "tech-challenge-db"
   org_id = var.mongodb_atlas_org_id
 }
 
